@@ -1,5 +1,212 @@
 <html>
-  <h1>
-    This is my webpage.
-  </h1>
+
+    <h1 style="font-family:verdana">
+        <div style="text-align: center; position: relative;">
+        <!-- <img src="https://marketing.illinois.edu/wp-content/uploads/2021/09/block-I-primary.png" width="50px" > -->
+        Visualizing Influences on Military Spending
+        </div>
+    </h1>
+
+    <style>
+        .container {
+          height: 600px;
+          position: relative;
+          border: 3px solid rgb(6, 22, 95);
+        }
+        
+        .horizontal-center {
+          margin: 0;
+          position: absolute;
+          left: 50%;
+          -ms-transform: translateX(-50%);
+          transform: translateX(-50%);
+        }
+    </style>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <div id="viz_area" class="container">
+        <script>
+            // set the dimensions and margins of the graph
+            var windowSize = document.getElementById('viz_area').getBoundingClientRect()
+
+            var margin = {top: 50, right: 200, bottom: 50, left: 50},
+                svg1Width = windowSize.width - (margin.left + margin.right),
+                svg1Height = 500 * 7/10,
+                svg2Width = windowSize.width - (margin.left + margin.right),
+                svg2Height = 500 * 3/10;
+            
+            // append the svg object to the body of the page
+            var svg2 = d3.select("#viz_area")
+              .append("svg")
+                .attr("width", svg2Width)
+                .attr("height", svg2Height)
+                .attr("overflow", "visible")
+                .append("g")
+                .attr("transform",
+                      "translate(" + margin.left + ",0)");
+
+            var svg1 = d3.select("#viz_area")
+              .append("svg")
+                .attr("width", svg1Width)
+                .attr("height", svg1Height)
+                .attr("overflow", "visible")
+                .append("g")
+                .attr("transform",
+                      "translate(" + margin.left + ",50)");
+
+
+            async function init() {
+            // Read the Data
+            const data = await d3.csv('https://elsaawy.github.io/416project/spending_CPI_adj.csv')
+            const data_gov = await d3.csv('https://elsaawy.github.io/416project/government.csv')
+                // Add X axis
+                var x = d3.scaleLinear()
+                    .domain(d3.extent(data, function(d) { return d.Year; }))
+                    .range([ 0, svg1Width - 100 ]);
+                console.log( d3.extent(data, function(d) { return d.Year; }) )
+
+                var xAxis = svg1.append("g")
+                    .attr("transform", "translate(50," + svg1Height + ")")
+                    .call(d3.axisBottom(x).ticks(28).tickFormat(d3.format("d")))
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.05em")
+                    .attr("dy", ".50em")
+                    .attr("transform", "rotate(-50)")
+            
+                // Add X axis label:
+                svg1.append("text")
+                    .attr("text-anchor", "start")
+                    .attr("x", svg1Width -30 )
+                    .attr("y", svg1Height+20 )
+                    .text("Year");
+                
+                // Add Y axis
+                var y = d3.scaleLinear()
+                    .domain([300000, 900000])
+                    .range([ svg1Height-50, 0 ]);
+                console.log(d3.max(data, function(d) { return +d.NationalDefenseTotal_050C; }))
+                svg1.append("g")
+                    .attr("transform", "translate(50,50)")
+                    .call(d3.axisLeft(y))
+
+                // Add Y axis label:
+                svg1.append("text")
+                    .attr("text-anchor", "end")
+                    .attr("dominant-baseline", "central")
+                    .attr("x", -150)
+                    .attr("y", -20)
+                    .text("Spending in Millions")
+                    .attr("transform", "rotate(-90)")
+
+                var c2 = d3.scaleOrdinal()
+                    .domain([-100,100])
+                    .range(['orange', 'green'])
+
+                // Add the area
+                svg1.append("path")
+                    .datum(data)
+                    .attr("fill", "none")
+                    .attr("stroke")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", d3.line()
+                        .x(function(d) { return x(d.Year) })
+                        .y(function(d) { return y(d.NationalDefenseTotal_050C) }) )
+                        .attr("transform", "translate(50,50)")
+                /////////
+                //SVG 2//
+                /////////
+                
+                // Y2 Axis
+                var y2 = d3.scaleLinear()
+                        .domain([-20, 20] )
+                        .range([svg2Height, 0 ]);
+
+                    svg2.append("g")
+                        .attr("transform", "translate(50,50)")
+                        .call(d3.axisLeft(y2))
+                
+                // Add Y@ axis label:
+                svg2.append("text")
+                    .attr("text-anchor", "end")
+                    .attr("dominant-baseline", "central")
+                    .attr("x", -75)
+                    .attr("y", -5)
+                    .text("Growth (%)")
+                    .attr("transform", "rotate(-90)")
+
+                // X Axis
+                // var year = data.map(function)
+                var x2_1 = d3.scaleBand()
+                    .domain(data.map(function(d) { return d.Year; }))
+                    .range([ 0, svg1Width - 100 ])
+                    .padding(0.1)
+                
+                var x2Axis = svg2.append("g")
+                    .attr("transform", "translate(50," + (y2(0) + 50) + ")")
+                    .call(d3.axisBottom(x2_1).ticks(28).tickFormat(''))
+
+                // Color scale
+                var c2 = d3.scaleQuantize()
+                    .domain([-100,100])
+                    .range(['orange', 'green'])
+
+                console.log( "y2(0) = " + y2(0) )
+                // Plot the bar graph positive values
+                svg2.append("g")
+                    .selectAll("rect")
+                    .data(data)
+                    .enter()
+                    .append("rect")
+                        .attr("x", function(d) { return x2_1(d.Year); })
+                        .attr("y", function(d) { 
+                            if (d.PercentGrowth > 0) { return y2(d.PercentGrowth); }
+                            else {return y2(0);} })
+                        .attr("width", x2_1.bandwidth())
+                        .attr("height", function(d) { 
+                                if (d.PercentGrowth > 0) { return y2(0) -  y2(d.PercentGrowth) ;}
+                                else {return y2(d.PercentGrowth) - y2(0);} })
+                        .attr("fill", function(d) {return c2(d.PercentGrowth)})
+                        // .attr("transform", "translate(50,0)")
+                        .attr("transform", "translate(50,50)")
+
+            }        
+        </script>
+    </div>
+    <script>init()</script>
+
+
+    <div style="text-align: center; position: relative;">
+        <h1 style="font-family:verdana">Instructions</h1>
+    </div>
+        <p style="font-family:verdana">
+            <a href="">Lorem ipsum</a> The main paragraph for information on how to operate the site.
+        </p>
+        <p>
+
+            <div class="horizontal-center">
+                <button type="button"> <b style="font-family:verdana">Load Data</b> </button>
+            </div>
+        </p>
+
+    <div style="text-align:center; position:relative">
+        <br><h1 style="font-family:verdana;">Discussion</h1>
+    </div>
+        <p style="font-family:verdana">
+        </p>
+
+    <h2 style="font-family:verdana">What go here?</h2>
+        <p style="font-family:verdana">
+        </p>
+
+    <h2 style="font-family:verdana"> References </h2>
+        <p style="font-family:verdana">
+            Military Budgets: 	<a href="https://www.whitehouse.gov/omb/budget/historical-tables/">US Whitehouse</a> <br>
+            Inflation Data: <a href="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-">	Federal Reserve Bank of Minneapolis</a><br>
+            U.S. Weather and Climate Disasters:<a href="https://www.ncei.noaa.gov/access/billions/events">NOAA.GOV</a><br>
+            NBER based Recession Indicators for the United States: <a href="https://fred.stlouisfed.org/series/USREC"> Federal Reserve of St. Louise FRED Economic Data </a>
+
+        </p>
+    </div>
+
 </html>
