@@ -99,15 +99,15 @@
                     .text("Spending in Millions")
                     .attr("transform", "rotate(-90)")
 
-                var c2 = d3.scaleOrdinal()
-                    .domain([-100,100])
-                    .range(['orange', 'green'])
+                var c1 = d3.scaleOrdinal()
+                    .domain(['Republican','Democrat'])
+                    .range(['red', 'blue'])
 
                 // Add the area
                 svg1.append("path")
                     .datum(data)
                     .attr("fill", "none")
-                    .attr("stroke")
+                    .attr("stroke", function(d) {return c1(d.Presidency);})
                     .attr("stroke-width", 1.5)
                     .attr("d", d3.line()
                         .x(function(d) { return x(d.Year) })
