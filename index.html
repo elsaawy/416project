@@ -24,168 +24,238 @@
     </style>
     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <div id="viz_area" class="container">
-        <script>
-            // set the dimensions and margins of the graph
-            var windowSize = document.getElementById('viz_area').getBoundingClientRect()
 
-            var margin = {top: 50, right: 200, bottom: 50, left: 50},
-                svg1Width = windowSize.width - (margin.left + margin.right),
-                svg1Height = 500 * 7/10,
-                svg2Width = windowSize.width - (margin.left + margin.right),
-                svg2Height = 500 * 3/10;
-            
-            // append the svg object to the body of the page
-            var svg2 = d3.select("#viz_area")
-              .append("svg")
-                .attr("width", svg2Width)
-                .attr("height", svg2Height)
-                .attr("overflow", "visible")
-                .append("g")
-                .attr("transform",
-                      "translate(" + margin.left + ",0)");
-
-            var svg1 = d3.select("#viz_area")
-              .append("svg")
-                .attr("width", svg1Width)
-                .attr("height", svg1Height)
-                .attr("overflow", "visible")
-                .append("g")
-                .attr("transform",
-                      "translate(" + margin.left + ",50)");
-
-
-            async function init() {
-            // Read the Data
-            const data = await d3.csv('https://elsaawy.github.io/416project/spending_CPI_adj.csv')
-            const data_gov = await d3.csv('https://elsaawy.github.io/416project/government.csv')
-                // Add X axis
-                var x = d3.scaleLinear()
-                    .domain(d3.extent(data, function(d) { return d.Year; }))
-                    .range([ 0, svg1Width - 100 ]);
-                console.log( d3.extent(data, function(d) { return d.Year; }) )
-
-                var xAxis = svg1.append("g")
-                    .attr("transform", "translate(50," + svg1Height + ")")
-                    .call(d3.axisBottom(x).ticks(28).tickFormat(d3.format("d")))
-                    .selectAll("text")
-                    .style("text-anchor", "end")
-                    .attr("dx", "-.05em")
-                    .attr("dy", ".50em")
-                    .attr("transform", "rotate(-50)")
-            
-                // Add X axis label:
-                svg1.append("text")
-                    .attr("text-anchor", "start")
-                    .attr("x", svg1Width -30 )
-                    .attr("y", svg1Height+20 )
-                    .text("Year");
-                
-                // Add Y axis
-                var y = d3.scaleLinear()
-                    .domain([300000, 900000])
-                    .range([ svg1Height-50, 0 ]);
-                console.log(d3.max(data, function(d) { return +d.NationalDefenseTotal_050C; }))
-                svg1.append("g")
-                    .attr("transform", "translate(50,50)")
-                    .call(d3.axisLeft(y))
-
-                // Add Y axis label:
-                svg1.append("text")
-                    .attr("text-anchor", "end")
-                    .attr("dominant-baseline", "central")
-                    .attr("x", -150)
-                    .attr("y", -20)
-                    .text("Spending in Millions")
-                    .attr("transform", "rotate(-90)")
-
-                var c1 = d3.scaleOrdinal()
-                    .domain(['Republican','Democrat'])
-                    .range(['red', 'blue'])
-
-                // Add the area
-                svg1.append("path")
-                    .datum(data)
-                    .attr("fill", "none")
-                    .attr("stroke", function(d) {return c1(d.Presidency);})
-                    .attr("stroke-width", 1.5)
-                    .attr("d", d3.line()
-                        .x(function(d) { return x(d.Year) })
-                        .y(function(d) { return y(d.NationalDefenseTotal_050C) }) )
-                        .attr("transform", "translate(50,50)")
-                /////////
-                //SVG 2//
-                /////////
-                
-                // Y2 Axis
-                var y2 = d3.scaleLinear()
-                        .domain([-20, 20] )
-                        .range([svg2Height, 0 ]);
-
-                    svg2.append("g")
-                        .attr("transform", "translate(50,50)")
-                        .call(d3.axisLeft(y2))
-                
-                // Add Y@ axis label:
-                svg2.append("text")
-                    .attr("text-anchor", "end")
-                    .attr("dominant-baseline", "central")
-                    .attr("x", -75)
-                    .attr("y", -5)
-                    .text("Growth (%)")
-                    .attr("transform", "rotate(-90)")
-
-                // X Axis
-                // var year = data.map(function)
-                var x2_1 = d3.scaleBand()
-                    .domain(data.map(function(d) { return d.Year; }))
-                    .range([ 0, svg1Width - 100 ])
-                    .padding(0.1)
-                
-                var x2Axis = svg2.append("g")
-                    .attr("transform", "translate(50," + (y2(0) + 50) + ")")
-                    .call(d3.axisBottom(x2_1).ticks(28).tickFormat(''))
-
-                // Color scale
-                var c2 = d3.scaleQuantize()
-                    .domain([-100,100])
-                    .range(['orange', 'green'])
-
-                console.log( "y2(0) = " + y2(0) )
-                // Plot the bar graph positive values
-                svg2.append("g")
-                    .selectAll("rect")
-                    .data(data)
-                    .enter()
-                    .append("rect")
-                        .attr("x", function(d) { return x2_1(d.Year); })
-                        .attr("y", function(d) { 
-                            if (d.PercentGrowth > 0) { return y2(d.PercentGrowth); }
-                            else {return y2(0);} })
-                        .attr("width", x2_1.bandwidth())
-                        .attr("height", function(d) { 
-                                if (d.PercentGrowth > 0) { return y2(0) -  y2(d.PercentGrowth) ;}
-                                else {return y2(d.PercentGrowth) - y2(0);} })
-                        .attr("fill", function(d) {return c2(d.PercentGrowth)})
-                        // .attr("transform", "translate(50,0)")
-                        .attr("transform", "translate(50,50)")
-
-            }        
-        </script>
+    <div id="viz_area">
     </div>
-    <script>init()</script>
 
+    <script>
+    async function init() {
+        // Read the Data
+        const data = await d3.csv('https://elsaawy.github.io/416project/spending_CPI_adj.csv')
+        const data_gov = await d3.csv('https://elsaawy.github.io/416project/government.csv')
+
+        // set the dimensions and margins of the graph
+        var windowSize = document.getElementById('viz_area').getBoundingClientRect()
+
+        var margin = {top: 50, right: 200, bottom: 50, left: 50},
+            svg1Width = windowSize.width - (margin.right),
+            svg1Height = 600 * 3/10,
+            svg2Width = windowSize.width - (margin.right),
+            svg2Height = 600 * 7/10;
+
+        
+        // append the svg objects to the body of the page
+        d3.select("#viz_area")
+            .append("div")
+            .attr("id", "div1")
+
+        var svg1 = d3.select("#div1")
+            .append("svg")
+            .attr("width", svg1Width)
+            .attr("height", svg1Height)
+            .attr("overflow", "visible");
+
+        d3.select("#viz_area")
+            .append("div")
+            .attr("id", "div2")
+            .attr("height", svg2Height)
+
+        var svg2 = d3.select("#div2")
+            .append("svg")
+            .attr("id", "svg1")
+            .attr("width", svg2Width)
+            .attr("height", svg2Height)
+            .attr("overflow", "visible");
+
+
+                
+        /////////
+        //SVG 1// Bar Plot of Growth
+        /////////
+
+        // Y1 Axis // Add Y1 axis label:
+        var y1 = d3.scaleLinear()
+                .domain([-20, 20] )
+                .range([svg1Height - 50, 0 ]); //25px padding top and bottom
+
+        svg1.append("g")
+                .attr("transform", "translate(100,25)")
+                .call(d3.axisLeft(y1))
+        
+        svg1.append("text")
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "central")
+            .attr("x", -50)
+            .attr("y", 50)
+            .text("Growth (%)")
+            .attr("transform", "rotate(-90)")
+
+        // X1 Axis
+        var years = data.map(function(d) { return d.Year ; });
+        years = years.slice(1, years.length)
+        console.log(years)
+        var x1 = d3.scaleBand()
+            .domain(years)
+            .range([ 0, svg1Width - 200 ]) //100px padding on each side
+            .padding(0.1)
+        
+        var x1Axis = svg1.append("g")
+            .attr("transform", "translate(100," + (y1(0) + 25) + ")")
+            .call(d3.axisBottom(x1).tickFormat(''))
+
+        // Color scale
+        var c1 = d3.scaleQuantize()
+            .domain([-100,100])
+            .range(['orange', 'green'])
+
+        // Plot the bar graph positive values
+        svg1.append("g")
+            .selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+                .attr("x", function(d) { return x1(d.Year ); })
+                .attr("y", function(d) { 
+                    if (d.PercentGrowth > 0) { return y1(d.PercentGrowth); }
+                    else {return y1(0);} })
+                .attr("width", x1.bandwidth())
+                .attr("height", function(d) { 
+                    if (d.PercentGrowth > 0) { return y1(0) -  y1(d.PercentGrowth) ;}
+                    else {return y1(d.PercentGrowth) - y1(0);} })
+                .attr("fill", function(d) {return c1(d.PercentGrowth)})
+                .attr("transform", "translate(100,25)")
+                
+                
+
+        /////////
+        //SVG 2//
+        /////////
+        // Add X axis
+        var x2 = d3.scaleLinear()
+            .domain(d3.extent(data, function(d) { return d.Year; }))
+            .range([ 0, svg2Width - 200 ]);
+
+        var x2Axis = svg2.append("g")
+            .attr("transform", "translate(100," + (svg2Height-100) + ")")
+            .call(d3.axisBottom(x2).ticks(28).tickFormat(d3.format("d")))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.05em")
+            .attr("dy", ".50em")
+            .attr("transform", "rotate(-50)")
+        
+        // Add X axis label:
+        svg2.append("text")
+            .attr("text-anchor", "start")
+            .attr("x", svg2Width - 150 )
+            .attr("y", (svg2Height - 50) )
+            .text("Year");
+        
+        // Add Y axis
+        var y2 = d3.scaleLinear()
+            .domain([300000, 900000])
+            .range([ svg2Height-125, 0 ]);
+
+        svg2.append("g")
+            .attr("transform", "translate(100,25)")
+            .call(d3.axisLeft(y2))
+        
+        // Add Y axis label:
+        svg2.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .attr("x", -175)
+            .attr("y", 30)
+            .text("Spending in Millions (US $)")
+            .attr("transform", "rotate(-90)")
+
+        var c2 = d3.scaleOrdinal()
+            .domain(['Republican ', 'Democrat '])
+            .range(['red', 'blue'])
+
+        // create a tooltip
+        var Tooltip = d3.select("#div2")
+            .append("div")
+            .style("opacity", 0)
+            .style("z-index", "10")
+            .style("position", "absolute")
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+
+        // Three function that change the tooltip when user hover / move / leave a cell
+        var mouseover = function(d) {
+            Tooltip
+                .style("opacity", 1)
+            }
+        var mousemove = function(d) {
+            Tooltip
+                // .html("Spending: " + d.NationalDefenseTotal_050C)
+                .style("left", (d3.event.pageX+10)+"px")
+                .style("top", (d3.event.pageY-10)+"px")
+                .html("<p class='tooltip'>" + "Year: "+ d.Year +
+                        "<br>Spending: $" + d.NationalDefenseTotal_050C +
+                        "<br>Growth: " + d.PercentGrowth + "%" + 
+                        "<br>Presidency: " + d.Presidency+ "</p>")
+            }
+        var mouseleave = function(d) {
+            Tooltip
+                .style("opacity", 0)
+                .style("z-index", "0")
+            }
+
+        // Add the lines
+        svg2.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2.5)
+            .attr("d", d3.line()
+                .x(function(d) { return x2(d.Year) })
+                .y(function(d) { return y2(d.NationalDefenseTotal_050C) }) )
+                .attr("transform", "translate(100,25)")
+        
+        svg2.append("g")
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+                .attr("class", "myCircle")
+                .attr("cx", function(d) { return x2(d.Year) } )
+                .attr("cy", function(d) { return y2(d.NationalDefenseTotal_050C) } )
+                .attr("r", 4)
+                .attr("stroke", "black")
+                .attr("stroke-width", 1.1)
+                .attr("fill", function(d) {return c2(d.Presidency)})
+                .attr("transform", "translate(100,25)")
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave)
+
+
+        //Update the button after success
+        button = document.getElementById("button1")
+        button.innerHTML="<b style='font-family:verdana'>NEXT</b>"
+        button.onclick="newfun()"
+    }        
+    </script>
 
     <div style="text-align: center; position: relative;">
+        <br>
+        <button type="button" id="button1" onclick=init() > <b style="font-family:verdana">LOAD DATA</b></button>
+
         <h1 style="font-family:verdana">Instructions</h1>
+
     </div>
         <p style="font-family:verdana">
             <a href="">Lorem ipsum</a> The main paragraph for information on how to operate the site.
         </p>
         <p>
-
             <div class="horizontal-center">
-                <button type="button"> <b style="font-family:verdana">Load Data</b> </button>
+                
             </div>
         </p>
 
