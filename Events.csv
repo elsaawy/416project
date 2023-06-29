@@ -1,0 +1,73 @@
+Event,Category,Sub-Category,Year
+Cuban Missile Crisis,Geopolitical,Military,1962
+Brunei Revolt,Conflict,Non-US Conflict, 1962
+JFK Assassination,Geopolitical,Political,1963
+Aden Emergency,Conflict,Non-US Conflict, 1963
+Indonesian Confrontation,Conflict,Non-US Conflict, 1963
+"""Bloody Sunday""",Geopolitical,Economic,1965
+Dominican Civil War,Conflict,US Conflict,1965
+Korean DMZ Conflict,Conflict,US Conflict,1966
+Cambodian Civil War,Conflict,US Conflict,1967
+Six Day War,Conflict,Non-US Conflict,1967
+MLK Assassinated,Geopolitical,Political,1968
+Birth of Internet,Geopolitical,Technology,1969
+Moon Landing,Geopolitical,Technology,1969
+'The Troubles',Conflict,Non-US Conflict, 1969
+Central/Eastern Drought/Heat Wave ,Disaster,Drought,1980
+Lebanon Intervention,Conflict,US Conflict,1982
+Falklands Conflict,Conflict,Non-US Conflict, 1982
+Invasion of Grenada,Conflict,US Conflict,1983
+Libya Bombing,Conflict,US Conflict,1986
+Black Monday,Geopolitical,Economic,1987
+Tanker War (Persian Gulf),Conflict,US Conflict,1987
+U.S. Drought/Heat Wave ,Disaster,Drought,1988
+Fall of Berlin Wall,Geopolitical,Political,1989
+Invasion of Panama,Conflict,US Conflict,1989
+Tiananmen Square,Geopolitical,Political,1989
+Gulf War,Conflict,US Conflict,1990
+Collapse of USSR,Geopolitical,Political,1991
+Sierra Leone Civil War,Conflict,Non-US Conflict, 1991
+Bosnia War Intervention,Conflict,US Conflict,1992
+End of Cold War,Geopolitical,Military,1992
+Bosnian War,Conflict,Non-US Conflict, 1992
+Hurricane Andrew ,Disaster,Tropical Cyclone,1992
+Midwest Flooding ,Disaster,Flooding,1993
+Haiti Intervention,Conflict,US Conflict,1994
+Kosovo War Intervention,Conflict,US Conflict,1998
+Kosovo War,Conflict,Non-US Conflict, 1998
+9/11 Attacks,Geopolitical,Military,2001
+Afghanistan War,Conflict,US Conflict,2001
+Yemen Intervention,Conflict,US Conflict,2002
+Iraq War,Conflict,US Conflict,2003
+Pakistan Intervention,Conflict,US Conflict,2004
+Hurricane Ivan ,Disaster,Tropical Cyclone,2004
+Hurricane Katrina ,Disaster,Tropical Cyclone,2005
+Hurricane Rita ,Disaster,Tropical Cyclone,2005
+Hurricane Wilma ,Disaster,Tropical Cyclone,2005
+Somali Civil War Intervention,Conflict,US Conflict,2007
+2008 Collapse,Geopolitical,Economic,2008
+Hurricane Ike ,Disaster,Tropical Cyclone,2008
+Operation Ocean Shield,Conflict,US Conflict,2009
+Arab Spring,Geopolitical,Military,2010
+Oil Spill,Geopolitical,Disaster,2010
+Libya Intervention,Conflict,US Conflict,2011
+Osama Bin Laden Killed,Geopolitical,Military,2011
+Libya Conflict,Conflict,Non-US Conflict, 2011
+Syria Conflict,Conflict,Non-US Conflict, 2011
+Hurricane Sandy ,Disaster,Tropical Cyclone,2012
+U.S. Drought/Heat Wave ,Disaster,Drought,2012
+Chinese Belt Initiative,Geopolitical,Political,2013
+Iraq Intervention,Conflict,US Conflict,2014
+Syria Intervention,Conflict,US Conflict,2014
+Yemen Conflict,Conflict,Non-US Conflict, 2014
+Libya Intervention,Conflict,US Conflict,2015
+Hurricane Harvey ,Disaster,Tropical Cyclone,2017
+Hurricane Irma ,Disaster,Tropical Cyclone,2017
+Hurricane Maria ,Disaster,Tropical Cyclone,2017
+Hurricane Florence ,Disaster,Tropical Cyclone,2018
+Hurricane Michael ,Disaster,Tropical Cyclone,2018
+"Western Wildfires, California Firestorm ",Disaster,Wildfire,2018
+COVID-19,Geopolitical,Disaster,2020
+Hurricane Laura ,Disaster,Tropical Cyclone,2020
+Hurricane Ida ,Disaster,Tropical Cyclone,2021
+Hurricane Ian ,Disaster,Tropical Cyclone,2022
