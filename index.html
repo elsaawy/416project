@@ -117,7 +117,7 @@
         // COLOR Axis (use the column headers to make a color for each category)
         var c = d3.scaleOrdinal()
             .domain(keys)
-            .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"])
+            .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#17becf","#7f7f7f","#bcbd22"])
 
         //stack the data for area chart
         var stackedData = d3.stack()
@@ -282,7 +282,7 @@
         // COLOR Axis (use the column headers to make a color for each category)
         var c = d3.scaleOrdinal()
             .domain(keys)
-            .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"])
+            .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#17becf","#7f7f7f","#bcbd22"])
 
         //stack the data for area chart
         var stackedData = d3.stack()
@@ -724,7 +724,7 @@
         
         // document.getElementById("viz_area").innerHTML="&emsp;&emsp; &emsp; <button onclick=&quot;update('US Conflict')&quot;>US Conflicts</button>" +
                     
-        document.getElementById("viz_area").innerHTML="&emsp;&emsp; &emsp; <button id='conflictUS'>US Conflicts</button>" +
+        document.getElementById("viz_area").innerHTML="&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; <button id='conflictUS'>US Conflicts</button>" +
                                                         "&emsp;<button id='conflictWorld'>World Conflicts</button>" +
                                                         "&emsp;<button id='disaster'>Disasters</button>" +
                                                         "&emsp;<button id='geopolitical'>Geopolitical</button>" + 
@@ -863,6 +863,25 @@
             }
             console.log(data_events_filtered)
             // Add the events to the graph
+            svg1.selectAll("line")
+                .remove()
+
+            svg1.selectAll("line")
+                .data(data_events_filtered)
+                .enter()
+                .append("line")
+                    .on("mouseover", mouseover)
+                    .on("mousemove", mousemove1)
+                    .on("mouseleave", mouseleave)
+                .transition()
+                    .attr("x1", function(d) { return x(d.Date); })
+                    .attr("x2", function(d) { return x(d.Date); })
+                    .attr("y1", function(d,i) {if (i % 2 == 0) { return -25; }
+                                                else {return -15;} })
+                    .attr("y2", 0)
+                    .attr("stroke", "grey")
+                    .attr("transform", "translate(100,"+(svg1Height-50)+")")
+
             svg1.selectAll("circle")
                 .remove()
             
@@ -879,10 +898,12 @@
                     .attr("cy", function(d,i) {if (i % 2 == 0) { return -25; }
                                                 else {return -15;} })
                     .attr("r", 4)
-                    .attr("stroke", "black")
+                    .attr("stroke", function(d) {return c(d.Category)})
                     .attr("stroke-width", 1)
                     .attr("fill", function(d) {return c(d.Category)})
                     .attr("transform", "translate(100,"+(svg1Height-50)+")")
+
+
 
         }
         update('US Conflict')
@@ -968,14 +989,15 @@
         //////////
 
         // Add one dot in the legend for each name.
-        var size = 6
+        var size = 11
         svg1.selectAll("myrect")
             .data(eventCategories)
             .enter()
-            .append("circle") 
-                .attr("cx", svg1Width - 50)
-                .attr("cy", function(d,i){ return 10 + i*(size+10)}) // 100 is where the first dot appears. 25 is the distance between dots
-                .attr("r", size)
+            .append("rect") 
+                .attr("x", svg1Width - 50)
+                .attr("y", function(d,i){ return 10 + i*(size+15)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("width", size)
+                .attr("height", size)
                 .style("fill", function(d){ return c(d)})
 
         // Key to Label Mapping
@@ -985,9 +1007,9 @@
             .data(eventCategories)
             .enter()
             .append("text")
-                .attr("x", svg1Width - 50 + size*1.2)
-                .attr("y", function(d,i){ return 10 + i*(size+10) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
-                .text(function(d){ return d})
+                .attr("x", svg1Width - 50 + size*1.5)
+                .attr("y", function(d,i){ return 10 + i*(size+15) + (size/2+2)})
+                .text(function(d){ return  d})
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
