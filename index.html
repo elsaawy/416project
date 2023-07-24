@@ -37,17 +37,21 @@
 
     async function init() {
         // Read the Data
-        data_spending = await d3.csv('/spending_CPI_adj.csv')
-        data_spending_raw = await d3.csv('/spending_raw.csv')
-        data_events = await d3.csv('/Events.csv', function(d){
+        
+        // data_spending = await d3.csv('/spending_CPI_adj.csv')
+        // data_spending_raw = await d3.csv('/spending_raw.csv')
+        // data_events = await d3.csv('/Events.csv', function(d){
+        //                 return {Name : d.Name, Category : d.Category, Type : d.Type, Date: d3.timeParse("%m-%d-%Y")(d.Date)}})
+        // data_recc = await d3.csv('/recession_indicators.csv', function(d){
+        //                 return { Date : d3.timeParse("%Y-%m-%d")(d.Date), Indicator : d.Indicator }})
+
+        data_spending = await d3.csv('https://elsaawy.github.io/416project/spending_CPI_adj.csv')
+        data_spending_raw = await d3.csv('https://elsaawy.github.io/416project/spending_raw.csv')
+        data_events = await d3.csv('https://elsaawy.github.io/416project/Events.csv', function(d){
                         return {Name : d.Name, Category : d.Category, Type : d.Type, Date: d3.timeParse("%m-%d-%Y")(d.Date)}})
-        data_recc = await d3.csv('/recession_indicators.csv', function(d){
+        data_recc = await d3.csv('https://elsaawy.github.io/416project/recession_indicators.csv', function(d){
                         return { Date : d3.timeParse("%Y-%m-%d")(d.Date), Indicator : d.Indicator }})
 
-        // const data_spending = await d3.csv('https://elsaawy.github.io/416project/spending_CPI_adj.csv')
-        // const data_events = await d3.csv('https://elsaawy.github.io/416project/Events.csv')
-        // const data_recc = await d3.csv('https://elsaawy.github.io/416project/recession_indicators.csv', function(d){
-        //                 return { Date : d3.timeParse("%Y-%m-%d")(d.Date), Indicator : d.Indicator }}))
 
         document.getElementById("viz_area").innerHTML = ""
         // set the dimensions and margins of the graph
@@ -211,7 +215,8 @@
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function func1() {
         // Read the Data
-        data_spending_raw = await d3.csv('/spending_raw_CPI_adj.csv')
+        data_spending_raw = await d3.csv('https://elsaawy.github.io/416project/spending_raw_CPI_adj.csv')
+        // data_spending_raw = await d3.csv('/spending_raw_CPI_adj.csv')
 
         document.getElementById("viz_area").innerHTML = ""
         // set the dimensions and margins of the graph
