@@ -1,12 +1,16 @@
 <html>
+
     <div style="text-align: center; position: relative;">
-        <h1 style="font-family:verdana">
+        <h1>
         Visualizing Influences on Military Spending
         </h1>
         <h2 id="viz_title"><br></h2>
     </div>
 
     <style>
+        html * {
+            font-family: verdana;
+        }
         .container {
           height: 600px;
           position: relative;
@@ -201,13 +205,13 @@
         viz_title =document.getElementById("viz_title") 
         viz_title.innerHTML="Growth of Military Spending Over the Past 50 Years"
         document.getElementById("text_header").innerHTML="Discussion"
-        document.getElementById("text_area").innerHTML="National Defense spending has grown from 52.35 Billion USD to 765.82 Billion USD from 1962 to 2022, "+
+        document.getElementById("text_area").innerHTML="Between 1962 to 2022 national defense spending has grown from 52.35 B to 765.82 B USD, "+
         "a 1,462% increase! <br> Of the 9.0 Trillion USD spent in 2022, this represents over 10 percent of the annual government spending. " +
         "As we can see in the figure above, this is not a linear growth, certain periods exhibit dramatic increases in defense spending. " +
         "For example, in 1980 and early 2000's, we see a rapid increase in military spending. " +
-        "Before we can address the important question of what drove these periods of rapid growth, "+
-        "we need to address an important factor... INFLATION." +
-        "<br> Hover over the legend items to focus on a specific category!"+
+        "Before we can explore the important question of what drove these periods of rapid growth, "+
+        "we need to address an important factor... inflation." +
+        "<br><br> Hover over the legend items to focus on a specific category!"+
         "<br> Click <b>NEXT</b> to see the figure updated for inflation."
 
     }        
@@ -286,6 +290,24 @@
             .domain(keys)
             .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#17becf","#7f7f7f","#bcbd22"])
 
+        //////////
+        // HIGHLIGHT Legend //
+        //////////
+
+        // What to do when one group is hovered
+        var highlight = function(d){
+            console.log(d)
+            // reduce opacity of all groups
+            d3.selectAll(".myArea").style("opacity", .1)
+            // except the one that is hovered
+            d3.select("."+d).style("opacity", 1)
+        }
+
+        // And when it is not hovered anymore
+        var noHighlight = function(d){
+            d3.selectAll(".myArea").style("opacity", 1)
+        }
+
         //stack the data for area chart
         var stackedData = d3.stack()
             .keys(keys)
@@ -307,24 +329,6 @@
                 .style("fill", function(d) { console.log(d.key) ; return c(d.key); })
                 .attr("d", area)
                 .attr("transform", "translate(100,25)")
-
-        //////////
-        // HIGHLIGHT GROUP //
-        //////////
-
-        // What to do when one group is hovered
-        var highlight = function(d){
-            console.log(d)
-            // reduce opacity of all groups
-            d3.selectAll(".myArea").style("opacity", .1)
-            // except the one that is hovered
-            d3.select("."+d).style("opacity", 1)
-        }
-
-        // And when it is not hovered anymore
-        var noHighlight = function(d){
-            d3.selectAll(".myArea").style("opacity", 1)
-        }
 
         //////////
         // LEGEND //
@@ -368,15 +372,16 @@
         viz_title =document.getElementById("viz_title") 
         viz_title.innerHTML="Inflation Adjusted Growth of Military Spending Over the Past 50 Years"
         document.getElementById("text_area").innerHTML="In the previous visualization we saw a dramtic increase in national defense "+
-        "spending of 1,462%. The spending was adjusted to 2022 currency using the Consumer Price Index (CPI) from the Federal " +
-        "Reserve Bank of Minneapolis. The basic formula is Adjusted Value = Actual Value * (2022 CPI / Current CPI). " +
-        "Adjusting for CPI reveals a very different story in the growth of national defense spending. National defense spending " +
-        "grew from 468 Billion to 709 Billion USD, a growth of 151%. Further investing the figure, we see that "+
-        "not all categories grew proportionally. For example, spending on personnel remained relatively constant over 50 years, " +
+        "spending over 50 years. The spending was adjusted to 2022 currency using the Consumer Price Index (CPI) from the Federal " +
+        "Reserve Bank of Minneapolis. The basic formula is: Adjusted Value = Actual Value * (2022 CPI / Current CPI). " +
+        "Adjusting for CPI reveals a different story in the growth of national defense spending. Adjusted national defense spending " +
+        "grew from 468 B to 709 B USD over 50 years, a growth of 151%. Looking closer at the figure, we see that "+
+        "not all categories grew proportionally (hover over the legend categories to highlight a specific group). " + 
+        "For example, spending on personnel remained relatively constant over 50 years, " +
         "whereas procurement and operations and maintenance spending had the most variability. " +
         "To explore the factors that could ifluence these variations, our next step is to correlate various events with the data." +
         
-        "<br> Hover over the legend items to focus on a specific category!" +
+        "<br><br> Hover over the legend items to focus on a specific category!" +
         "<br> Click <b>NEXT</b> to see the detailed annual growth information and correlation of "+
         "recession data, presidency, political party and unfication data.   "
     }   
@@ -610,10 +615,11 @@
                 .style("top", (d3.event.pageY-10)+"px")
                 .html("<p class='tooltip'>" + "Year:       "+ d.Year +
                         "<br>Spending:   $"+  Math.round(d.NationalDefenseTotal_050C).toLocaleString() + " M"+ 
-                        "<br>Growth:      " + d.PercentGrowth + "%" + 
-                        "<br>President:    " + d.President +
-                        "<br>Presidency:   " + d.Presidency+ 
-                        "<br>Government:  " + d.Division + "</p>")
+                        "<br>Growth:    &emsp;&emsp;  " + d.PercentGrowth + "%" + 
+                        "<br>President:   " + d.President +
+                        "<br>Presidency:  " + d.Presidency+ 
+                        "<br>Senate:      " + d.Senate +
+                        "<br>House:       " + d.House + "</p>")
             }
 
 
@@ -717,15 +723,17 @@
 
         //Update the text
 
-        document.getElementById("text_area").innerHTML="In the previous visualization we saw national defense spending by category "+
+        document.getElementById("text_area").innerHTML="In the previous visualizations we saw national defense spending by category "+
         "after adjusting for inflation. We will focus on the total inflation adjusted spending as we correlate various factors, " +
-        "to help understand the magnitude of year-to-year changes, we also show the growth rate. " +
-        "Two of the largest factors that likely influence government spending and the first that we will investigarte are: "+ 
+        "keeping in mind that not all categories of military spending grew proportionally." +
+        "To help understand the magnitude of year-to-year changes, we plot the annual growth rate. as we explore the two factors." +
+        "The first factors we will investigate are what most would consider the largest likely influence on government spending: "+ 
         "1) the administration's political party, and 2) the national economy." +
-        "<br> In the national defense spending figure, we correlate the Presidents' political party and the 'unification' " +
-        "of the administration. Using the" +
-        "<a href='https://fred.stlouisfed.org/series/USREC'> Federal Reserve of St. Louis FRED Economic Data </a> " + 
-        "we update the growth chart with the periods of recession." +
+        "<br> To correlate and plot the administration's political party, we show the Presidents' political party at each data point " +
+        "in the spending plot. The point is colored to represent not just the President's party, but also the administration's 'unification' " +
+        "(wether or not congress is controlled by the same political party). Additional information regarding Congress is available on demand." +
+        "<br> To identify periods of recession, the <a href='https://fred.stlouisfed.org/series/USREC'> Federal Reserve of St. Louis FRED Economic Data </a> " + 
+        "monthly recession indicators are used to update the growth chart with periods of recession." +
         "<br>According to the <a href='https://www.aei.org/foreign-and-defense-policy/the-defense-budget-through-administrations/'> "+
         "American Enterprise Institute</a>, Republican administrations, on average, increase defense spending. "+
         "However, in the figure above " +
@@ -970,9 +978,6 @@
                     .attr("stroke-width", 1)
                     .attr("fill", function(d) {return c(d.Category)})
                     .attr("transform", "translate(100,"+(svg1Height-50)+")")
-
-
-
         }
         update('US Conflict')
         /////////
@@ -1154,7 +1159,7 @@
             .enter()
             .append("rect") 
                 .attr("x", svg1Width - 50)
-                .attr("y", function(d,i){ return 10 + i*(size+15)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("y", function(d,i){ return 10 + i*(size+15)})
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function(d){ return c(d)})
@@ -1179,26 +1184,24 @@
         // Add one dot in the legend for each name.
         gov_keys = ['Republican - Unified','Republican - Divided','Democrat - Divided' , 'Democrat - Unified']
 
-        var size = 20
+        var size = 11
         svg2.selectAll("myrect")
             .data(gov_keys)
             .enter()
             .append("rect") 
                 .attr("x", svg2Width - 50)
-                .attr("y", function(d,i){ return svg2Height/3 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("y", function(d,i){ return svg2Height/3 + i*(size+15)}) 
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function(d){ return c2(d)})
 
         // Key to Label Mapping
-
-        // Add one dot in the legend for each name.
         svg2.selectAll("mylabels")
             .data(gov_keys)
             .enter()
             .append("text")
                 .attr("x", svg2Width - 50 + size*1.2)
-                .attr("y", function(d,i){ return svg2Height/3 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("y", function(d,i){ return svg2Height/3 + i*(size+15) + (size/2+2)}) 
                 .text(function(d){ return d})
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
@@ -1273,6 +1276,9 @@
                 Source <a href="https://www.ncei.noaa.gov/access/billions/events">NOAA.GOV</a><br>
             NBER based Recession Indicators for the United States: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Monthly Recession Indicators (csv)</a>; 
                 Source <a href="https://fred.stlouisfed.org/series/USREC"> Federal Reserve of St. Louis FRED Economic Data </a>
+            United States Administration Political Party: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Party Government</a>; 
+                Source <a href="https://history.house.gov/Institution/Presidents-Coinciding/Party-Government/"> US Whitehouse History </a>
+                
 
         </p>
     </div>
