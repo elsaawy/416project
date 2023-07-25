@@ -44,14 +44,14 @@
     async function init() {
         // Read the Data
         
-        // data_spending = await d3.csv('/spending_CPI_adj.csv')
+        // data_spending = await d3.csv('/government_and_spending_CPI_adj.csv')
         // data_spending_raw = await d3.csv('/spending_raw.csv')
         // data_events = await d3.csv('/Events.csv', function(d){
         //                 return {Name : d.Name, Category : d.Category, Type : d.Type, Date: d3.timeParse("%m-%d-%Y")(d.Date)}})
         // data_recc = await d3.csv('/recession_indicators.csv', function(d){
         //                 return { Date : d3.timeParse("%Y-%m-%d")(d.Date), Indicator : d.Indicator }})
 
-        data_spending = await d3.csv('https://elsaawy.github.io/416project/spending_CPI_adj.csv')
+        data_spending = await d3.csv('https://elsaawy.github.io/416project/government_and_spending_CPI_adj.csv')
         data_spending_raw = await d3.csv('https://elsaawy.github.io/416project/spending_raw.csv')
         data_events = await d3.csv('https://elsaawy.github.io/416project/Events.csv', function(d){
                         return {Name : d.Name, Category : d.Category, Type : d.Type, Date: d3.timeParse("%m-%d-%Y")(d.Date)}})
@@ -175,8 +175,8 @@
             .data(keys)
             .enter()
             .append("rect")
-                .attr("x", svgWidth - 50)
-                .attr("y", function(d,i){ return 10 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", svgWidth - 70)
+                .attr("y", function(d,i){ return svgHeight/4 + i*(size+5)})
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function(d){ return c(d)})
@@ -192,8 +192,8 @@
             .data(keys)
             .enter()
             .append("text")
-                .attr("x", svgWidth - 50 + size*1.2)
-                .attr("y", function(d,i){ return 10 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", svgWidth - 70 + size*1.2)
+                .attr("y", function(d,i){ return svgHeight/4 + i*(size+5) + (size/2)}) 
                 .text(function(d){ return title(d)})
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
@@ -340,8 +340,8 @@
         .data(keys)
         .enter()
         .append("rect")
-            .attr("x", svgWidth - 50)
-            .attr("y", function(d,i){ return 10 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("x", svgWidth - 70)
+            .attr("y", function(d,i){ return svgHeight/4 + i*(size+5)}) 
             .attr("width", size)
             .attr("height", size)
             .style("fill", function(d){ return c(d)})
@@ -357,8 +357,8 @@
         .data(keys)
         .enter()
         .append("text")
-            .attr("x", svgWidth - 50 + size*1.2)
-            .attr("y", function(d,i){ return 10 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("x", svgWidth - 70 + size*1.2)
+            .attr("y", function(d,i){ return svgHeight/4 + i*(size+5) + (size/2)}) 
             .text(function(d){ return title(d)})
             .attr("text-anchor", "left")
             .style("alignment-baseline", "middle")
@@ -425,21 +425,9 @@
             .attr("height", svg2Height)
             .attr("overflow", "visible");
 
-        // Functions for Tooltip that are shared
-        var mouseover = function(d) {
-            Tooltip
-                .style("opacity", .95)
-                .style("z-index", "10")
-            }
-        var mouseleave = function(d) {
-            Tooltip
-                .style("opacity", 0)
-                .style("z-index", "-1") //Hides the tooltip for densely packed data
-            }
-                
-        /////////
-        //SVG 1// Bar Plot of Growth
-        /////////
+    ///////////////
+    //AXES (SVG1)// Bar Plot of Growth  --- NEED THESE FOR TOOLTIP SIZES
+    ///////////////
 
         // Y1 Axis // Add Y1 axis label:
         var y1 = d3.scaleLinear()
@@ -453,9 +441,9 @@
         svg1.append("text")
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "central")
-            .attr("x", -50)
+            .attr("x", -40)
             .attr("y", 50)
-            .text("Growth (%)")
+            .text("Percentage")
             .attr("transform", "rotate(-90)")
 
         // X1 Axis
@@ -477,7 +465,45 @@
             .domain([-100,100])
             .range(['maroon', 'green'])
 
-        // Create a tooltip for first plot
+        // X1_2 Axes, recession indicators and color scale
+        var recc_date = data_recc.map(function(d) { return d.Date; });
+
+        var x1_2 = d3.scaleBand()
+            .domain(recc_date)
+            .range([ 0, svg1Width - 200 ]) //100px padding on each side
+            .padding(0.1)
+
+        var c1_2 = d3.scaleQuantize()
+            .domain([0,1])
+            .range(['white', 'red'])
+
+    //////////////
+    // Tooltips //
+    //////////////
+        // Vertical line follower
+        var focus = svg1
+                        .append("g")
+                        .style("opacity", 0)
+                        .attr("class", "focus");
+
+        focus
+            .append("rect")
+            .attr("class", "x")
+            .attr("stroke", "grey")
+            .attr('fill', "none")
+            .style("z-index", "-10")
+            .attr("width", x1.bandwidth())
+            .attr("x", 100 )
+            .attr("y", (svg1Height- 89) )
+            .attr("height", (svg1Height + svg2Height - 191.25));
+
+
+        function mouseMove(d) {
+            focus.select(".x")
+                .attr("transform", "translate(" + ( x1(d.Year)) + ",0)")
+        }
+
+        // Create a tooltip object
         var Tooltip = d3.select("#div2")
             .append("div")
             .style("opacity", 0)
@@ -490,29 +516,68 @@
             .style("border-radius", "5px")
             .style("padding", "5px")
 
+        // Functions for Tooltip for hover over SVG1
+        var mouseover1 = function(d) {
+            Tooltip
+                .style("opacity", .95)
+                .style("z-index", "10")
+            focus.style("opacity", 1)
+                .style("z-index", "10");
+        }
+        var mouseleave1 = function(d) {
+            Tooltip
+                .style("opacity", 0)
+                .style("z-index", "-1") //Hides the tooltip for densely packed data
+            focus.style("opacity", 0)
+                .style("z-index", "-1");
+        }
         var mousemove1 = function(d) {
             Tooltip
                 .style("left", (d3.event.pageX+10)+"px")
                 .style("top", (d3.event.pageY-10)+"px")
-                .html("<p class='tooltip'>" + "Year: "+ d.Year +
-                        "<br>Spending: $" + Math.round(d.NationalDefenseTotal_050C).toLocaleString() + " M"+ 
-                        "<br>Growth: " + d.PercentGrowth + "%" + 
-                        "<br>Presidency: " + d.Presidency + 
-                        "<br>Government: " + d.Division + "</p>")
+                .html("<center><u>"+ (d.Year-1) +" - " + (d.Year) + "</center></u>" +
+                      "Growth:    &emsp;   " + d.PercentGrowth + "%" + 
+                      "<br>Annual Inflation: " + Math.round(d.InflationRate * 100)+ "%" +
+                      "<br>President:          " + d.President +
+                      "<br>Government:         " + d.Division);
+            mouseMove(d);
+        }
+
+        //SVG 2 Tooltip function
+        // For the defense spending plot
+        var mouseover2 = function(d) {
+            Tooltip
+                .style("opacity", .95)
+                .style("z-index", "10");
+            focus.style("opacity", 1)
+                .style("z-index", "-1");
+            }
+        var mouseleave2 = function(d) {
+            Tooltip
+                .style("opacity", 0)
+                .style("z-index", "-1"); //Hides the tooltip for densely packed data
+            focus.style("opacity", 0)
+                .style("z-index", "-1");
+            }
+        var mousemove2 = function(d) {
+            Tooltip
+                .style("left", (d3.event.pageX+10)+"px")
+                .style("top", (d3.event.pageY-10)+"px")
+                .html("<center><u>"+ d.Year + "</center></u>" +
+                      "Spending:   $"+  Math.round(d.NationalDefenseTotal_050C).toLocaleString() + " M"+ 
+                      "<br>Growth:    &emsp;   " + d.PercentGrowth + "%" + 
+                      "<br>President:          " + d.President +
+                      "<br>Presidency:         " + d.Presidency+ 
+                      "<br>Senate:             " + d.Senate +
+                      "<br>House:              " + d.House)
+                      ;
+            mouseMove(d);
             }
 
+    /////////
+    // SVG1 // Bar Plot of Growth  --- NEED THESE FOR TOOLTIP SIZES
+    /////////
         // Draw the recession indicator backgrounds
-        var recc_date = data_recc.map(function(d) { return d.Date; });
-
-        var x1_2 = d3.scaleBand()
-            .domain(recc_date)
-            .range([ 0, svg1Width - 200 ]) //100px padding on each side
-            .padding(0.1)
-
-        var c1_2 = d3.scaleQuantize()
-            .domain([0,1])
-            .range(['white', 'red'])
-
         svg1.append("g")
             .selectAll("backgroundRect")
             .data(data_recc)
@@ -527,7 +592,7 @@
                 .attr("opacity", .2)
                 .attr("z-index", 0)
 
-        // Plot the bar graph positive values
+        // Plot the bar graph growth rate values
         svg1.append("g")
             .selectAll("rect")
             .data(data_spending)
@@ -544,15 +609,31 @@
                 .attr("fill", function(d) {return c1(d.PercentGrowth)})
                 .attr("transform", "translate(100,25)")
                 .attr("z-index", 9)
-                .on("mouseover", mouseover)
+                .on("mouseover", mouseover1)
                 .on("mousemove", mousemove1)
-                .on("mouseleave", mouseleave)
-                
-                
+                .on("mouseleave", mouseleave1)
 
-        /////////
-        //SVG 2//
-        /////////
+
+        // Add the circles
+        svg1.selectAll("dot")
+            .data(data_spending.slice(1, years.length+1))
+            .enter()
+            .append("circle")
+                .attr("class", "myCircle")
+                .attr("cx", function(d) { return (x1(d.Year) + (x1.bandwidth() / 2)) } )
+                .attr("cy", function(d) { return y1(d.InflationRate*100) } )
+                .attr("r", 2)
+                .attr("stroke", "Black")
+                .attr("stroke-width", 1.1)
+                .attr("fill", "Black")
+                .attr("transform", "translate(100,25)")
+                .on("mouseover", mouseover1)
+                .on("mousemove", mousemove1)
+                .on("mouseleave", mouseleave1)
+
+    /////////
+    //SVG 2//
+    /////////
         // Add X axis
         var x2 = d3.scaleLinear()
             .domain(d3.extent(data_spending, function(d) { return d.Year; }))
@@ -596,33 +677,6 @@
             .domain(['Republican Unified','Republican Divided','Democrat Divided' , 'Democrat Unified'])
             .range(['Red', 'LightCoral',  'LightSkyBlue','Blue'])
 
-        // Create a tooltip for Second plot
-        var Tooltip = d3.select("#div2")
-            .append("div")
-            .style("opacity", 0)
-            .style("z-index", "10")
-            .style("position", "absolute")
-            .attr("class", "tooltip")
-            .style("background-color", "white")
-            .style("border", "solid")
-            .style("border-width", "2px")
-            .style("border-radius", "5px")
-            .style("padding", "5px")
-
-        var mousemove2 = function(d) {
-            Tooltip
-                .style("left", (d3.event.pageX+10)+"px")
-                .style("top", (d3.event.pageY-10)+"px")
-                .html("<p class='tooltip'>" + "Year:       "+ d.Year +
-                        "<br>Spending:   $"+  Math.round(d.NationalDefenseTotal_050C).toLocaleString() + " M"+ 
-                        "<br>Growth:    &emsp;&emsp;  " + d.PercentGrowth + "%" + 
-                        "<br>President:   " + d.President +
-                        "<br>Presidency:  " + d.Presidency+ 
-                        "<br>Senate:      " + d.Senate +
-                        "<br>House:       " + d.House + "</p>")
-            }
-
-
         // Add the lines
         svg2.append("path")
             .datum(data_spending)
@@ -647,15 +701,13 @@
                 .attr("stroke-width", 1.1)
                 .attr("fill", function(d) {return c2(d.Presidency + d.Division)})
                 .attr("transform", "translate(100,25)")
-                .on("mouseover", mouseover)
+                .on("mouseover", mouseover2)
                 .on("mousemove", mousemove2)
-                .on("mouseleave", mouseleave)
+                .on("mouseleave", mouseleave2)
 
-
-
-        //////////
-        // LEGEND 1//
-        //////////
+    /////////////
+    // LEGEND 1//
+    /////////////
         // Add one dot in the legend for each name.
         var size = 11
         svg1.selectAll("myrect")
@@ -668,11 +720,17 @@
                 .attr("height", size)
                 .style("fill", function(d, i){ return ["Green", "Maroon", "#F5B7B1"][i]})
 
-        // Key to Label Mapping
+        svg1.append("circle")
+                .attr("cx", svg1Width - 44 )
+                .attr("cy", 134 )
+                .attr("r", 5)
+                .attr("stroke", "Black")
+                .attr("stroke-width", 1)
+                .attr("fill", "Black")
 
         // Add one dot in the legend for each name.
         svg1.selectAll("mylabels")
-            .data(["Growth", "Decline", "Recession"])
+            .data(["Growth", "Decline", "Recession", "Inflation"])
             .enter()
             .append("text")
                 .attr("x", svg1Width - 50 + size*1.5)
@@ -681,32 +739,30 @@
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
-        //////////
-        // LEGEND 2 //
-        //////////
-        // Add one dot in the legend for each name.
-        gov_keys = ['Republican - Unified','Republican - Divided','Democrat - Divided' , 'Democrat - Unified']
+    //////////
+    // LEGEND 2 //
+    //////////
+        // Add one blot in the legend for each name.
+        gov_keys = ['Republican - Unified','Republican - Divided','Democrat   - Divided' , 'Democrat  - Unified']
 
-        var size = 20
+        var size = 11
         svg2.selectAll("myrect")
             .data(gov_keys)
             .enter()
             .append("rect") 
                 .attr("x", svg2Width - 50)
-                .attr("y", function(d,i){ return svg1Height/2 + i*(size+5)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("y", function(d,i){ return svg2Height/3 + i*(size+10)}) 
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function(d){ return c2(d)})
 
-        // Key to Label Mapping
-
-        // Add one dot in the legend for each name.
+        // Add name.
         svg2.selectAll("mylabels")
             .data(gov_keys)
             .enter()
             .append("text")
-                .attr("x", svg2Width - 50 + size*1.2)
-                .attr("y", function(d,i){ return svg1Height/2 + i*(size+5) + (size/2)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("x", svg2Width - 50 + size*1.5)
+                .attr("y", function(d,i){ return svg2Height/3 + i*(size+10) + (size/2 + 2)})
                 .text(function(d){ return d})
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
@@ -737,18 +793,19 @@
         "<br>According to the <a href='https://www.aei.org/foreign-and-defense-policy/the-defense-budget-through-administrations/'> "+
         "American Enterprise Institute</a>, Republican administrations, on average, increase defense spending. "+
         "However, in the figure above " +
-        "we see that while this is mostly true, there are periods in which the opposite is true. For example, 1968 - 1973 " +
+        "we see that while this is mostly true, there are periods in which the opposite is true. For example, defense spending from 1964 - 1968 "+ 
+        "grew consistently despite a unified Democrat administration, and 1968 - 1973 " +
         "is marked by constant decrease in national defense spending despite a Republican presidency."+
-        "While the administration is not unified, meaning the one political party controls the presidency and congress, " +
-        "we cannot point to this as the cause because a divided administration is responsible for a period of increased spending from " +
-        "1981 - 1986."
-        "<br> Turning our attention to the impact of recessions on national defense spending, we see there is no clear connection.  " +
-        "While it could be said that periods of recessions are generally followed by a period of decreased national defense spending " +
-        "there are instances in which recessions did not precede periods of decline, or recessions are followed by a period of " +
-        "continued spending increase."+
+        "Looking at periods of recessions also does not provide insight into change in defense spending. We expect governments increase spending " +
+        "back into the national economy to stimulate growth, increase employment, and stem the effects of a recession. While this is likely true of " +
+        "national spending as a whole, it does not seem to be the case for national defense spending, even on a time lagged scale. "
+
+        "<br> In summary, there is a correllation between administration and spending change, and no immediate correlation between   " +
+        "recession indicators and national defense spending. However, the correlation between administration and spending is not definitive. " +
+        "There are likely other factors that also influence defense spending. "
         
-        "<br> Hover over chart points to see specific data!" +
-        "<br> Click <b>NEXT</b> to see the correlation of geopolitical events with growth of defense spending."
+        "<br><br> Hover over chart points to see details on demand!" +
+        "<br> Click <b>NEXT</b> to see the correlation of geopolitical events with defense spending."
 
     }        
 
@@ -758,14 +815,13 @@
     
     async function func3() {
         // Clear the viz area and add buttons for the different event categories.
-        
-        // document.getElementById("viz_area").innerHTML="&emsp;&emsp; &emsp; <button onclick=&quot;update('US Conflict')&quot;>US Conflicts</button>" +
-                    
+        // Add the buttons            
         document.getElementById("viz_area").innerHTML="&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; <button id='conflictUS'>US Conflicts</button>" +
                                                         "&emsp;<button id='conflictWorld'>World Conflicts</button>" +
                                                         "&emsp;<button id='disaster'>Disasters</button>" +
                                                         "&emsp;<button id='geopolitical'>Geopolitical</button>" + 
                                                         "&emsp;<button id='All'> All </button>"
+        // Update the button onclick feature (can't do this while adding because of all the quotation marks.)
         document.getElementById("conflictUS").onclick = function() {update("US Conflict");}
         document.getElementById("conflictWorld").onclick = function() {update('Non-US Conflict');}
         document.getElementById("disaster").onclick = function() {update('Disaster');}
@@ -806,9 +862,9 @@
             .attr("height", svg2Height)
             .attr("overflow", "visible");
 
-
-        // Functions for Tooltip
-
+    /////////////
+    //Tooltips///
+    ////////////
         // Vertical line follower
         var focus = svg1
                         .append("g")
@@ -831,32 +887,6 @@
                 .attr("transform", "translate(" + ( x(d.Date) - 1) + ",0)")
         }
 
-        var mouseover = function(d) {
-            Tooltip
-                .style("opacity", .95)
-                .style("z-index", "10");
-            focus.style("opacity", 1)
-                 .style("z-index", "10");
-            }
-        var mouseleave = function(d) {
-            Tooltip
-                .style("opacity", 0)
-                .style("z-index", "-1"); //Hides the tooltip for densely packed data
-            focus.style("opacity", 0)
-                 .style("z-index", "-1");
-            }
-
-        var mouseover2 = function(d) {
-            Tooltip
-                .style("opacity", .95)
-                .style("z-index", "10");
-            }
-        var mouseleave2 = function(d) {
-            Tooltip
-                .style("opacity", 0)
-                .style("z-index", "-1"); //Hides the tooltip for densely packed data
-            }
-
         // Create a tooltip for plot
         var Tooltip = d3.select("#div1")
             .append("div")
@@ -870,31 +900,62 @@
             .style("border-radius", "5px")
             .style("padding", "5px")
 
+        // Create the mouse move functions
+        // For the events plot
+        var mouseover1 = function(d) {
+            Tooltip
+                .style("opacity", .95)
+                .style("z-index", "10");
+            focus.style("opacity", 1)
+                 .style("z-index", "10");
+            }
+        var mouseleave1 = function(d) {
+            Tooltip
+                .style("opacity", 0)
+                .style("z-index", "-1"); //Hides the tooltip for densely packed data
+            focus.style("opacity", 0)
+                 .style("z-index", "-1");
+            }
+
         var mousemove1 = function(d) {
             Tooltip
                 .style("left", (d3.event.pageX+10)+"px")
                 .style("top", (d3.event.pageY-10)+"px")
-                .html("<p class='tooltip'>" + "Event:    " + d.Name + 
-                        "<br> Date:       " + d.Date.toDateString() +
-                        "<br><br>Category:  "+  d.Category+ 
-                        "<br>Type:      " + d.Type); 
+                .html("<center><u>"+ d.Name + "</u></center>" + 
+                      "Date:         "+ d.Date.toDateString() +
+                      "<br><br>Category:  "+  d.Category+ 
+                      "<br>Type:          "+ d.Type); 
                     
             mouseMove(d);}
+
+        // For the defense spending plot
+        var mouseover2 = function(d) {
+            Tooltip
+                .style("opacity", .95)
+                .style("z-index", "10");
+            }
+        var mouseleave2 = function(d) {
+            Tooltip
+                .style("opacity", 0)
+                .style("z-index", "-1"); //Hides the tooltip for densely packed data
+            }
 
         var mousemove2 = function(d) {
             Tooltip
                 .style("left", (d3.event.pageX+10)+"px")
                 .style("top", (d3.event.pageY-10)+"px")
-                .html("<p class='tooltip'>" + "Year:       "+ d.Year +
-                        "<br>Spending:   $"+  Math.round(d.NationalDefenseTotal_050C).toLocaleString() + " M"+ 
-                        "<br>Growth:      " + d.PercentGrowth + "%" + 
-                        "<br>President:    " + d.President +
-                        "<br>Presidency:   " + d.Presidency+ 
-                        "<br>Government:  " + d.Division + "</p>") }
+                .html("Year:  &emsp; &emsp; &emsp; &emsp; "+ d.Year +
+                      "<br>Spending:   $"+  Math.round(d.NationalDefenseTotal_050C).toLocaleString() + " M"+ 
+                      "<br>Growth:    &emsp;   " + d.PercentGrowth + "%" + 
+                      "<br>President:          " + d.President +
+                      "<br>Presidency:         " + d.Presidency+ 
+                      "<br>Senate:             " + d.Senate +
+                      "<br>House:              " + d.House)
+            }
 
-        /////////
-        //SVG 1// -- Timeline
-        /////////
+    /////////
+    //SVG 1// -- Timeline
+    /////////
         // Create the categories for the type of events
         var eventCategories = ["US Conflict", "Non-US Conflict", "Geopolitical", "Disaster"]
         
@@ -946,9 +1007,9 @@
                 .data(data_events_filtered)
                 .enter()
                 .append("line")
-                    .on("mouseover", mouseover)
+                    .on("mouseover", mouseover1)
                     .on("mousemove", mousemove1)
-                    .on("mouseleave",mouseleave)
+                    .on("mouseleave",mouseleave1)
                 .transition()
                     .attr("x1", function(d) { return x(d.Date); })
                     .attr("x2", function(d) { return x(d.Date); })
@@ -965,9 +1026,9 @@
                 .data(data_events_filtered)
                 .enter()
                 .append("circle")
-                    .on("mouseover", mouseover)
+                    .on("mouseover", mouseover1)
                     .on("mousemove", mousemove1)
-                    .on("mouseleave",mouseleave)
+                    .on("mouseleave",mouseleave1)
                 .transition()
                 // .duration(1000)
                     .attr("cx", function(d) { return x(d.Date) } )
@@ -980,9 +1041,11 @@
                     .attr("transform", "translate(100,"+(svg1Height-50)+")")
         }
         update('US Conflict')
-        /////////
-        //SVG 2// -- Growth Chart
-        /////////
+
+
+    /////////
+    //SVG 2// -- Growth Chart
+    /////////
         // Add X axisfor the defense spending
         var x2 = d3.scaleLinear()
             .domain(d3.extent(data_spending, function(d) { return d.Year; }))
@@ -1056,9 +1119,9 @@
                 .on("mousemove", mousemove2)
                 .on("mouseleave", mouseleave2)
         
-        ////////////////
-        //Annotations///
-        ////////////////
+    ////////////////
+    //Annotations///
+    ////////////////
         const annotations = [
         {
           note: {
@@ -1148,9 +1211,9 @@
             .attr("class", "annotation-group")
             .call(makeAnnotations)
 
-        //////////
-        // LEGEND 1 //
-        //////////
+    //////////
+    // LEGEND 1 //
+    //////////
 
         // Add one dot in the legend for each name.
         var size = 11
@@ -1177,9 +1240,9 @@
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
-        //////////
-        // LEGEND 2 //
-        //////////
+    //////////
+    // LEGEND 2 //
+    //////////
 
         // Add one dot in the legend for each name.
         gov_keys = ['Republican - Unified','Republican - Divided','Democrat - Divided' , 'Democrat - Unified']
@@ -1190,7 +1253,7 @@
             .enter()
             .append("rect") 
                 .attr("x", svg2Width - 50)
-                .attr("y", function(d,i){ return svg2Height/3 + i*(size+15)}) 
+                .attr("y", function(d,i){ return svg2Height/3 + i*(size+10)}) 
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function(d){ return c2(d)})
@@ -1201,7 +1264,7 @@
             .enter()
             .append("text")
                 .attr("x", svg2Width - 50 + size*1.2)
-                .attr("y", function(d,i){ return svg2Height/3 + i*(size+15) + (size/2+2)}) 
+                .attr("y", function(d,i){ return svg2Height/3 + i*(size+10) + (size/2+2)}) 
                 .text(function(d){ return d})
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
@@ -1216,10 +1279,10 @@
 
         //Update the text
 
-        document.getElementById("text_area").innerHTML="In the previous visualization we saw national defense spending by category "+
-        "after adjusting for inflation. We will focus on the total inflation adjusted spending as we correlate various factors, " +
-        "to help understand the magnitude of year-to-year changes, we also show the growth rate. " +
-        "Two of the largest factors that likely influence government spending and the first that we will investigarte are: "+ 
+        document.getElementById("text_area").innerHTML="In the previous visualization we explored the impact of the government's political "+
+        "party and the national economic state on inflation adjusted defense spending. We saw a correlation between political party and spending, " +
+        "however, it was not able to fully explain the trends in spending. Another important factor to consider, are geopolitical events, both  " +
+        "nationally and internationally. "+ 
         "1) the administration's political party, and 2) the national economy." +
         "<br> In the national defense spending figure, we correlate the Presidents' political party and the 'unification' " +
         "of the administration. Using the" +
@@ -1259,7 +1322,7 @@
         As an active duty military member, I am very interested in this topic and exploring the impact of key factors 
         changes in National Defense spending. We will explore the growth of National Defense spending over the last 50 years (1962-2023),
         correlate political, econimic, and world events in an attempt to identy driving factors. <br><br>
-        &emsp; <b>Press "START" above to begin.</b> Throughout the journey, the buttons will be available to navigate the visualizations.
+        &emsp; <b>Press "START" above to begin.</b> Throughout the journey, navigations buttons will be available to step forward and back throughtout the visualizations.
         Discussions of the visualizations will appear below the figures, and hints for interacting the figures will also provide some 
         guidance.  
     </p>
