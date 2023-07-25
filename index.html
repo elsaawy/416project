@@ -23,6 +23,8 @@
     </style>
     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <!-- //annotations -->
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.js"></script> 
 
     <div id="viz_area"> </div>
 
@@ -646,9 +648,36 @@
 
 
         //////////
-        // LEGEND //
+        // LEGEND 1//
         //////////
+        // Add one dot in the legend for each name.
+        var size = 11
+        svg1.selectAll("myrect")
+            .data(["Growth", "Decline", "Recession"])
+            .enter()
+            .append("rect") 
+                .attr("x", svg1Width - 50)
+                .attr("y", function(d,i){ return 50 + i*(size+15)}) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("width", size)
+                .attr("height", size)
+                .style("fill", function(d, i){ return ["Green", "Maroon", "#F5B7B1"][i]})
 
+        // Key to Label Mapping
+
+        // Add one dot in the legend for each name.
+        svg1.selectAll("mylabels")
+            .data(["Growth", "Decline", "Recession"])
+            .enter()
+            .append("text")
+                .attr("x", svg1Width - 50 + size*1.5)
+                .attr("y", function(d,i){ return 50 + i*(size+15) + (size/2+2)})
+                .text(function(d){ return  d})
+                .attr("text-anchor", "left")
+                .style("alignment-baseline", "middle")
+
+        //////////
+        // LEGEND 2 //
+        //////////
         // Add one dot in the legend for each name.
         gov_keys = ['Republican - Unified','Republican - Divided','Democrat - Divided' , 'Democrat - Unified']
 
@@ -771,15 +800,53 @@
 
 
         // Functions for Tooltip
+
+        // Vertical line follower
+        var focus = svg1
+                        .append("g")
+                        .style("opacity", 0)
+                        .attr("class", "focus");
+
+        focus
+            .append("rect")
+            .attr("class", "x")
+            .attr("stroke", "grey")
+            .attr('fill', "grey")
+            .style("z-index", "-10")
+            .attr("width", 2)
+            .attr("x", 100 )
+            .attr("y", svg1Height-50 )
+            .attr("height", svg1Height-50 + svg2Height-115);
+
+        function mouseMove(d) {
+            focus.select(".x")
+                .attr("transform", "translate(" + ( x(d.Date) - 1) + ",0)")
+        }
+
         var mouseover = function(d) {
             Tooltip
                 .style("opacity", .95)
-                .style("z-index", "10")
+                .style("z-index", "10");
+            focus.style("opacity", 1)
+                 .style("z-index", "10");
             }
         var mouseleave = function(d) {
             Tooltip
                 .style("opacity", 0)
-                .style("z-index", "-1") //Hides the tooltip for densely packed data
+                .style("z-index", "-1"); //Hides the tooltip for densely packed data
+            focus.style("opacity", 0)
+                 .style("z-index", "-1");
+            }
+
+        var mouseover2 = function(d) {
+            Tooltip
+                .style("opacity", .95)
+                .style("z-index", "10");
+            }
+        var mouseleave2 = function(d) {
+            Tooltip
+                .style("opacity", 0)
+                .style("z-index", "-1"); //Hides the tooltip for densely packed data
             }
 
         // Create a tooltip for plot
@@ -795,7 +862,6 @@
             .style("border-radius", "5px")
             .style("padding", "5px")
 
-
         var mousemove1 = function(d) {
             Tooltip
                 .style("left", (d3.event.pageX+10)+"px")
@@ -803,7 +869,9 @@
                 .html("<p class='tooltip'>" + "Event:    " + d.Name + 
                         "<br> Date:       " + d.Date.toDateString() +
                         "<br><br>Category:  "+  d.Category+ 
-                        "<br>Type:      " + d.Type) }
+                        "<br>Type:      " + d.Type); 
+                    
+            mouseMove(d);}
 
         var mousemove2 = function(d) {
             Tooltip
@@ -815,7 +883,7 @@
                         "<br>President:    " + d.President +
                         "<br>Presidency:   " + d.Presidency+ 
                         "<br>Government:  " + d.Division + "</p>") }
-        
+
         /////////
         //SVG 1// -- Timeline
         /////////
@@ -872,7 +940,7 @@
                 .append("line")
                     .on("mouseover", mouseover)
                     .on("mousemove", mousemove1)
-                    .on("mouseleave", mouseleave)
+                    .on("mouseleave",mouseleave)
                 .transition()
                     .attr("x1", function(d) { return x(d.Date); })
                     .attr("x2", function(d) { return x(d.Date); })
@@ -891,7 +959,7 @@
                 .append("circle")
                     .on("mouseover", mouseover)
                     .on("mousemove", mousemove1)
-                    .on("mouseleave", mouseleave)
+                    .on("mouseleave",mouseleave)
                 .transition()
                 // .duration(1000)
                     .attr("cx", function(d) { return x(d.Date) } )
@@ -979,10 +1047,101 @@
                 .attr("stroke-width", 1.1)
                 .attr("fill", function(d) {return c2(d.Presidency + d.Division)})
                 .attr("transform", "translate(100,25)")
-                .on("mouseover", mouseover)
+                .on("mouseover", mouseover2)
                 .on("mousemove", mousemove2)
-                .on("mouseleave", mouseleave)
+                .on("mouseleave", mouseleave2)
         
+        ////////////////
+        //Annotations///
+        ////////////////
+        const annotations = [
+        {
+          note: {
+            label: "03-08-1965",
+            title: "US Enters Vietnam",
+            wrap: 75
+          },
+          data: {x: "03-08-1965", y: 435_493},
+          dy: -150,
+          dx: 0,
+          color: "#E8336D"
+        },{
+          note: {
+            label: "03-23-1983",
+            title: "Strategic Defense Initiative",
+            wrap: 75
+          },
+          data: {x: "03-23-1983", y: 571_122},
+          dy: -100,
+          dx: 0,
+          color: "#E8336D"
+        },{
+          note: {
+            label: "04-30-1975",
+            title: "End of Vietnam War",
+            wrap: 75
+          },
+          data: {x: "04-30-1975", y: 415_761},
+          dy: 20,
+          dx: 0,
+          color: "#1E8449"
+        },{
+          note: {
+            label: "12-25-1991",
+            title: "Collapse of USSR",
+            wrap: 75
+          },
+          data: {x: "12-25-1991", y: 543_761},
+          dy: -100,
+          dx: 0,
+          color: "#1E8449"
+        },{
+          note: {
+            label: "09-11-2001",
+            title: "9/11 Attacks",
+            wrap: 75
+          },
+          data: {x: "09-11-2001", y: 466_304},
+          dy: -120,
+          dx: 0,
+          color: "#E8336D"
+        },{
+          note: {
+            label: "12-15-2011",
+            title: "End of Iraq War",
+            wrap: 75
+          },
+          data: {x: "12-15-2011", y: 850_178},
+          dy: -20,
+          dx: 0,          
+          color: "#1E8449"
+        },{
+          note: {
+            label: "08-30-2021",
+            title: "End of Afghan War",
+            wrap: 75
+          },
+          data: {x: "08-30-2021", y: 738_308},
+          dy: 70,
+          dx: -1,          
+          color: "#1E8449"
+        }]
+
+        const parseTime = d3.timeParse("%m-%d-%Y")
+
+        const makeAnnotations = d3.annotation()
+            .type(d3.annotationCallout)
+            .accessors({ 
+            x: function(d){ return x(parseTime(d.x)) + 100},
+            y: function(d){ return y2(d.y) + 20 }
+            })
+            .annotations(annotations)
+
+        d3.select("#svg1")
+            .append("g")
+            .style("font", "10px times")
+            .attr("class", "annotation-group")
+            .call(makeAnnotations)
 
         //////////
         // LEGEND 1 //
@@ -1047,9 +1206,7 @@
         //Update the page
         //Update the button
         button = document.getElementById("button_area")
-        button.innerHTML='<button type="button" id="button1" onclick=func2()> <b style="font-family:verdana"> BACK </b></button>'+
-            '    ' +
-            '<button type="button" id="button2" onclick=func3()> <b style="font-family:verdana"> NEXT </b></button>'
+        button.innerHTML='<button type="button" id="button1" onclick=func2()> <b style="font-family:verdana"> BACK </b></button>'
         //Update the Title
         viz_title =document.getElementById("viz_title") 
         viz_title.innerHTML="Correlating Events with Inflation Adjusted Growth of Military"
