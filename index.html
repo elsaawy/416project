@@ -8,15 +8,11 @@
     </div>
 
     <style>
+        /* set document font style */
         html * {
             font-family: verdana;
+            zoom: 100%;
         }
-        .container {
-          height: 600px;
-          position: relative;
-          border: 3px solid rgb(6, 22, 95);
-        }
-        
         .horizontal-center {
           margin: 0;
           position: absolute;
@@ -25,32 +21,32 @@
           transform: translateX(-50%);
         }
     </style>
+
+    <!-- Load packages -->
     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <!-- //annotations -->
+    <!-- Load annotations package -->
     <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.js"></script> 
 
+    <!-- Create the main visualization element -->
     <div id="viz_area"> </div>
 
     <script>
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////                   START                                       //////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialize data variable (allows data variable sharing between functions.)
     var data_spending;
     var data_spending_raw;
     var data_events;
     var data_recc;
-
+    
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////                   Figure 0                                    //////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     async function init() {
         // Read the Data
         
-        // data_spending = await d3.csv('/government_and_spending_CPI_adj.csv')
-        // data_spending_raw = await d3.csv('/spending_raw.csv')
-        // data_events = await d3.csv('/Events.csv', function(d){
-        //                 return {Name : d.Name, Category : d.Category, Type : d.Type, Date: d3.timeParse("%m-%d-%Y")(d.Date)}})
-        // data_recc = await d3.csv('/recession_indicators.csv', function(d){
-        //                 return { Date : d3.timeParse("%Y-%m-%d")(d.Date), Indicator : d.Indicator }})
-
         data_spending = await d3.csv('https://elsaawy.github.io/416project/government_and_spending_CPI_adj.csv')
         data_spending_raw = await d3.csv('https://elsaawy.github.io/416project/spending_raw.csv')
         data_events = await d3.csv('https://elsaawy.github.io/416project/Events.csv', function(d){
@@ -73,12 +69,13 @@
 
         var svg1 = d3.select("#div1")
             .append("svg")
+            .attr("id", "svg1")
             .attr("width", svgWidth)
             .attr("height", svgHeight)
             .attr("overflow", "visible");
         
         // Get the column headers of the CSV file
-        var keys = ['Housing', 'Defense-related', 'Construction', 'AEC', 'R_D', 'Procurement', 'Personnel', 'Operation_Maintenance']
+        var keys = ['Operation_Maintenance', 'Personnel', 'Procurement', 'R_D', 'AEC', 'Construction', 'Defense-related', 'Housing']
         console.log(keys)
 
         // X-AXIS
@@ -91,8 +88,8 @@
             .call(d3.axisBottom(x).ticks(28).tickFormat(d3.format("d")))
             .selectAll("text")
             .style("text-anchor", "end")
-            .attr("dx", "-.05em")
-            .attr("dy", ".50em")
+            .attr("dx", "-.5em")
+            .attr("dy", ".20em")
             .attr("transform", "rotate(-50)")
 
         // Add X axis label:
@@ -104,7 +101,7 @@
         
         // Add Y axis
         var y = d3.scaleLinear()
-            .domain([0, 750_000])
+            .domain([0, 900_000])
             .range([ svgHeight-125, 0 ]);
 
         svg1.append("g")
@@ -165,6 +162,59 @@
             d3.selectAll(".myArea").style("opacity", 1)
         }
 
+    ////////////////
+    //Annotations///
+    ////////////////
+    const annotations = [
+        {
+          note: {
+            label: "1979",
+            title: "Period of rapid growth",
+            wrap: 200
+          },
+          data: {x: "1979", y: 100_000},
+          dy: -150,
+          dx: 0
+        },{
+          note: {
+            label: "1991"
+          },
+          data: {x: "1991", y: 300_000},
+          dy: -45,
+          dx: -1
+        },{
+          note: {
+            label: "2001",
+            title: "Period of rapid growth",
+            wrap: 200
+          },
+          data: {x: "2001", y: 300_000},
+          dy: -240,
+          dx: 0
+        },{
+          note: {
+            label: "2011",
+            wrap: 75
+          },
+          data: {x: "2011", y: 700_000},
+          dy: -30,
+          dx: -1
+        }]
+
+        const makeAnnotations = d3.annotation()
+            .type(d3.annotationCallout)
+            .accessors({ 
+            x: function(d){ return x(d.x) + 100},
+            y: function(d){ return y(d.y) + 20}
+            })
+            .annotations(annotations)
+
+        d3.select("#svg1")
+            .append("g")
+            .style("font", "10px times")
+            .attr("class", "annotation-group")
+            .call(makeAnnotations)
+
         //////////
         // LEGEND //
         //////////
@@ -186,7 +236,8 @@
         // Key to Label Mapping
         var title = d3.scaleOrdinal()
             .domain(keys)
-            .range(['Housing', 'Defense Related', 'Construction', 'Atomic Energy', 'R & D', 'Procurement', 'Personnel', 'Operation & Maintenance'])
+            .range(['Operation & Maintenance','Personnel','Procurement','Atomic Energy',
+                    'R & D', 'Construction', 'Defense Related', 'Housing'])
         // Add one dot in the legend for each name.
         svg1.selectAll("mylabels")
             .data(keys)
@@ -204,13 +255,15 @@
         button.innerHTML='<button type="button" id="button1" onclick=func1()> <b style="font-family:verdana"> NEXT </b></button>'
         viz_title =document.getElementById("viz_title") 
         viz_title.innerHTML="Growth of Military Spending Over the Past 50 Years"
-        document.getElementById("text_header").innerHTML="Discussion"
-        document.getElementById("text_area").innerHTML="Between 1962 to 2022 national defense spending has grown from 52.35 B to 765.82 B USD, "+
-        "a 1,462% increase! <br> Of the 9.0 Trillion USD spent in 2022, this represents over 10 percent of the annual government spending. " +
-        "As we can see in the figure above, this is not a linear growth, certain periods exhibit dramatic increases in defense spending. " +
-        "For example, in 1980 and early 2000's, we see a rapid increase in military spending. " +
+        document.getElementById("text_area").innerHTML="&emsp;&emsp;Between 1962 to 2022 national defense spending has grown from 52.35 B to 765.82 B USD, "+
+        "a <b>1,462% increase</b>! <br> Of the 8.0 Trillion USD reported by the " + 
+        "<a href='https://www.whitehouse.gov/omb/budget/historical-tables/'>US Whitehouse</a> spent in 2022, " + 
+        "this represents over 10 percent of the annual government spending. " +
+        "As we can see in the figure above, this is not a steady growth, certain periods exhibit dramatic increases in defense spending. " +
+        "The annotations mark periods of higher growth rates between 1979 to 1991, 2001 to 2011, and that we are in a current period of " + 
+        "increased growth. " +
         "Before we can explore the important question of what drove these periods of rapid growth, "+
-        "we need to address an important factor... inflation." +
+        "we need to adjust the spending figures to account for an important factor... inflation." +
         "<br><br> Hover over the legend items to focus on a specific category!"+
         "<br> Click <b>NEXT</b> to see the figure updated for inflation."
 
@@ -220,12 +273,13 @@
     ////////////////                   FUNCTION 1                                  //////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function func1() {
-        // Read the Data
+        // Read the data (CPI adjusted categorical data)
         data_spending_raw = await d3.csv('https://elsaawy.github.io/416project/spending_raw_CPI_adj.csv')
-        // data_spending_raw = await d3.csv('/spending_raw_CPI_adj.csv')
 
+        //Clear visualization element
         document.getElementById("viz_area").innerHTML = ""
-        // set the dimensions and margins of the graph
+
+        // Calculate the dimensions and margins of the graphs based on window sizing
         var windowSize = document.getElementById('viz_area').getBoundingClientRect()
         var margin = {top: 50, right: 200, bottom: 50, left: 50},
             svgWidth = windowSize.width - (margin.right),
@@ -238,12 +292,13 @@
 
         var svg1 = d3.select("#div1")
             .append("svg")
+            .attr("id", "svg1")
             .attr("width", svgWidth)
             .attr("height", svgHeight)
             .attr("overflow", "visible");
         
-        // Get the column headers of the CSV file
-        var keys = ['Housing', 'Defense-related', 'Construction', 'AEC', 'R_D', 'Procurement', 'Personnel', 'Operation_Maintenance']
+        // Create array of keys of the CSV file (standardizes layout)
+        var keys = ['Operation_Maintenance', 'Personnel', 'Procurement', 'R_D', 'AEC', 'Construction', 'Defense-related', 'Housing']
         console.log(keys)
 
         // X-AXIS
@@ -256,8 +311,8 @@
             .call(d3.axisBottom(x).ticks(28).tickFormat(d3.format("d")))
             .selectAll("text")
             .style("text-anchor", "end")
-            .attr("dx", "-.05em")
-            .attr("dy", ".50em")
+            .attr("dx", "-.5em")
+            .attr("dy", ".20em")
             .attr("transform", "rotate(-50)")
 
         // Add X axis label:
@@ -267,7 +322,7 @@
             .attr("y", (svgHeight - 50) )
             .text("Year");
         
-        // Add Y axis
+        // Y-Axis
         var y = d3.scaleLinear()
             .domain([0, 900_000])
             .range([ svgHeight-125, 0 ]);
@@ -320,7 +375,8 @@
                 .x(function(d, i) { return x(d.data.Year); })
                 .y0(function(d) { return y(d[0]); })
                 .y1(function(d) { return y(d[1]); })
-            
+        
+        // Plot the lines and areas of the stacked area chart.
         svg1.selectAll("mylayers")
             .data(stackedData)
             .enter()
@@ -330,9 +386,82 @@
                 .attr("d", area)
                 .attr("transform", "translate(100,25)")
 
-        //////////
+        ///////////////
+        //Annotations//
+        ///////////////
+        const annotations = [
+        {
+          note: {
+            label: "1965",
+            title: "Period of rapid growth",
+            wrap: 63
+          },
+          data: {x: "1965", y: 435_000},
+          color: "red",
+          dy: -150,
+          dx: 0
+        },{
+          note: {
+            label: "1968"
+          },
+          data: {x: "1968.2", y: 610_000},
+          color: "red",
+          dy: -57.5,
+          dx: -1
+        },{
+          note: {
+            label: "1979",
+            title: "Period of rapid growth",
+            wrap: 200
+          },
+          data: {x: "1979", y: 420_000},
+          dy: -150,
+          dx: 0
+        },{
+          note: {
+            label: "1986"
+          },
+          data: {x: "1986", y: 660_000},
+          color: "red",
+          dy: -23.5,
+          dx: -1
+        },{
+          note: {
+            label: "2001",
+            title: "Period of rapid growth",
+            wrap: 200
+          },
+          data: {x: "2001", y: 450_000},
+          dy: -225,
+          dx: 0
+        },{
+          note: {
+            label: "2010",
+            wrap: 75
+          },
+          data: {x: "2010", y: 850_000},
+          color: "red",
+          dy: -15,
+          dx: -.1
+        }]
+
+        const makeAnnotations = d3.annotation()
+            .type(d3.annotationCallout)
+            .accessors({ 
+            x: function(d){ return x(d.x) + 100},
+            y: function(d){ return y(d.y) + 20}
+            })
+            .annotations(annotations)
+
+        d3.select("#svg1")
+            .append("g")
+            .style("font", "10px times")
+            .attr("class", "annotation-group")
+            .call(makeAnnotations)
+
+        ////////////
         // LEGEND //
-        //////////
+        ////////////
 
         // Add one dot in the legend for each name.
         var size = 20
@@ -351,7 +480,8 @@
         // Key to Label Mapping
         var title = d3.scaleOrdinal()
             .domain(keys)
-            .range(['Housing', 'Defense Related', 'Construction', 'Atomic Energy', 'R & D', 'Procurement', 'Personnel', 'Operation & Maintenance'])
+            .range(['Operation & Maintenance','Personnel','Procurement','Atomic Energy',
+                    'R & D', 'Construction', 'Defense Related', 'Housing'])
         // Add one dot in the legend for each name.
         svg1.selectAll("mylabels")
         .data(keys)
@@ -365,25 +495,36 @@
             .on("mouseover", highlight)
             .on("mouseleave", noHighlight)
 
+        // Update the navigation buttons
         button = document.getElementById("button_area")
         button.innerHTML='<button type="button" id="button1" onclick=init()> <b style="font-family:verdana"> BACK </b></button>' +
                          '\t' + 
                          '<button type="button" id="button2" onclick=func2()> <b style="font-family:verdana"> NEXT </b></button>'
+        // Update the chart title
         viz_title =document.getElementById("viz_title") 
         viz_title.innerHTML="Inflation Adjusted Growth of Military Spending Over the Past 50 Years"
-        document.getElementById("text_area").innerHTML="In the previous visualization we saw a dramtic increase in national defense "+
-        "spending over 50 years. The spending was adjusted to 2022 currency using the Consumer Price Index (CPI) from the Federal " +
-        "Reserve Bank of Minneapolis. The basic formula is: Adjusted Value = Actual Value * (2022 CPI / Current CPI). " +
-        "Adjusting for CPI reveals a different story in the growth of national defense spending. Adjusted national defense spending " +
+        // Update discussion text
+        document.getElementById("text_area").innerHTML="&emsp;&emsp;In the previous visualization we saw a dramtic increase in national defense "+
+        "spending over 50 years. Because of the time scale of the spending values, we must adjust for inflation to accurately compare " +
+        "spending, this data was adjusted to 2021 USD using the Consumer Price Index (CPI) from the " +
+        "<a href='https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-'>Federal Reserve Bank of Minneapolis</a>" +
+        "The basic formula is: Adjusted Value = Actual Value * (2022 CPI / Current CPI). " +
+        "Adjusting for CPI reveals a different story in the growth of national defense spending. Now we see that defense spending " +
         "grew from 468 B to 709 B USD over 50 years, a growth of 151%. Looking closer at the figure, we see that "+
         "not all categories grew proportionally (hover over the legend categories to highlight a specific group). " + 
         "For example, spending on personnel remained relatively constant over 50 years, " +
         "whereas procurement and operations and maintenance spending had the most variability. " +
-        "To explore the factors that could ifluence these variations, our next step is to correlate various events with the data." +
+        "The annotations also mark the periods of rapid growth, and we can see the emergence of periods that we could not identitify " +
+        "in the previous figure, as well as a change in the previous date ranges identified. We also see that "+
+        "while national defense spending appeared to be at its highest in the most recent years, when adjusted for inflation, " +
+        "defense spending peaked in 2011. " + 
+        "With this overview of defense spending trends, we can begin to address the central question: " +
+        "<u>what are the primary factors that drive growth in national defense spending?</u> " +
+        "Our next step is to correlate events with the data to visualize correlation and identify potential cause and effect relationships." +
         
-        "<br><br> Hover over the legend items to focus on a specific category!" +
+        "<br><br> Hover over the legend items to highlight that specific category!" +
         "<br> Click <b>NEXT</b> to see the detailed annual growth information and correlation of "+
-        "recession data, presidency, political party and unfication data.   "
+        "recession data, administration political party, and inflation rates to defense spending trends."
     }   
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,10 +567,10 @@
             .attr("overflow", "visible");
 
     ///////////////
-    //AXES (SVG1)// Bar Plot of Growth  --- NEED THESE FOR TOOLTIP SIZES
+    //AXES (SVG1)// Bar Plot of Growth  --- NEED THESE EARLY FOR TOOLTIP SIZES
     ///////////////
 
-        // Y1 Axis // Add Y1 axis label:
+        // Y1 Axis:
         var y1 = d3.scaleLinear()
                 .domain([-20, 20] )
                 .range([svg1Height - 50, 0 ]); //25px padding top and bottom
@@ -497,13 +638,12 @@
             .attr("y", (svg1Height- 89) )
             .attr("height", (svg1Height + svg2Height - 191.25));
 
-
         function mouseMove(d) {
             focus.select(".x")
                 .attr("transform", "translate(" + ( x1(d.Year)) + ",0)")
         }
 
-        // Create a tooltip object
+        // Create a tooltip (details on demand) object
         var Tooltip = d3.select("#div2")
             .append("div")
             .style("opacity", 0)
@@ -543,8 +683,7 @@
             mouseMove(d);
         }
 
-        //SVG 2 Tooltip function
-        // For the defense spending plot
+        //SVG 2 Tooltip function ---  For the defense spending plot
         var mouseover2 = function(d) {
             Tooltip
                 .style("opacity", .95)
@@ -574,9 +713,9 @@
             mouseMove(d);
             }
 
-    /////////
-    // SVG1 // Bar Plot of Growth  --- NEED THESE FOR TOOLTIP SIZES
-    /////////
+    //////////
+    // SVG1 // Bar Plot of Growth
+    //////////
         // Draw the recession indicator backgrounds
         svg1.append("g")
             .selectAll("backgroundRect")
@@ -613,8 +752,7 @@
                 .on("mousemove", mousemove1)
                 .on("mouseleave", mouseleave1)
 
-
-        // Add the circles
+        // Add the circles for inflation values
         svg1.selectAll("dot")
             .data(data_spending.slice(1, years.length+1))
             .enter()
@@ -632,7 +770,7 @@
                 .on("mouseleave", mouseleave1)
 
     /////////
-    //SVG 2//
+    //SVG 2// --- DEFENSE SPENDING PLOT
     /////////
         // Add X axis
         var x2 = d3.scaleLinear()
@@ -719,7 +857,7 @@
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", function(d, i){ return ["Green", "Maroon", "#F5B7B1"][i]})
-
+        // Add legend item for the inflation rates seperately
         svg1.append("circle")
                 .attr("cx", svg1Width - 44 )
                 .attr("cy", 134 )
@@ -739,10 +877,10 @@
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
-    //////////
+    //////////////
     // LEGEND 2 //
-    //////////
-        // Add one blot in the legend for each name.
+    //////////////
+        // Add one block in the legend for each name.
         gov_keys = ['Republican - Unified','Republican - Divided','Democrat   - Divided' , 'Democrat  - Unified']
 
         var size = 11
@@ -756,7 +894,7 @@
                 .attr("height", size)
                 .style("fill", function(d){ return c2(d)})
 
-        // Add name.
+        // Add names
         svg2.selectAll("mylabels")
             .data(gov_keys)
             .enter()
@@ -768,7 +906,7 @@
                 .style("alignment-baseline", "middle")
 
 
-        //Update the button
+        //Update the navigation button
         button = document.getElementById("button_area")
         button.innerHTML='<button type="button" id="button1" onclick=func1()> <b style="font-family:verdana"> BACK </b></button>'+
             '    ' +
@@ -777,20 +915,19 @@
         viz_title =document.getElementById("viz_title") 
         viz_title.innerHTML="Correlating Events with Inflation Adjusted Growth of Military"
 
-        //Update the text
-
-        document.getElementById("text_area").innerHTML="In the previous visualizations we saw national defense spending by category "+
+        //Update the discussion text
+        document.getElementById("text_area").innerHTML="&emsp;&emsp;In the previous visualizations we saw national defense spending by category "+
         "after adjusting for inflation. We will focus on the total inflation adjusted spending as we correlate various factors, " +
         "keeping in mind that not all categories of military spending grew proportionally." +
         "To help understand the magnitude of year-to-year changes, we plot the annual growth rate. as we explore the two factors." +
         "The first factors we will investigate are what most would consider the largest likely influence on government spending: "+ 
         "1) the administration's political party, and 2) the national economy." +
-        "<br> To correlate and plot the administration's political party, we show the Presidents' political party at each data point " +
+        "<br> &emsp;&emsp;To correlate and plot the administration's political party, we show the Presidents' political party at each data point " +
         "in the spending plot. The point is colored to represent not just the President's party, but also the administration's 'unification' " +
         "(wether or not congress is controlled by the same political party). Additional information regarding Congress is available on demand." +
-        "<br> To identify periods of recession, the <a href='https://fred.stlouisfed.org/series/USREC'> Federal Reserve of St. Louis FRED Economic Data </a> " + 
+        "To identify periods of recession, the <a href='https://fred.stlouisfed.org/series/USREC'> Federal Reserve of St. Louis FRED Economic Data </a> " + 
         "monthly recession indicators are used to update the growth chart with periods of recession." +
-        "<br>According to the <a href='https://www.aei.org/foreign-and-defense-policy/the-defense-budget-through-administrations/'> "+
+        "<br>&emsp;&emsp;According to the <a href='https://www.aei.org/foreign-and-defense-policy/the-defense-budget-through-administrations/'> "+
         "American Enterprise Institute</a>, Republican administrations, on average, increase defense spending. "+
         "However, in the figure above " +
         "we see that while this is mostly true, there are periods in which the opposite is true. For example, defense spending from 1964 - 1968 "+ 
@@ -798,23 +935,21 @@
         "is marked by constant decrease in national defense spending despite a Republican presidency."+
         "Looking at periods of recessions also does not provide insight into change in defense spending. We expect governments increase spending " +
         "back into the national economy to stimulate growth, increase employment, and stem the effects of a recession. While this is likely true of " +
-        "national spending as a whole, it does not seem to be the case for national defense spending, even on a time lagged scale. "
+        "national spending as a whole, it does not seem to be the case for national defense spending, even on a time lagged scale. " +
 
-        "<br> In summary, there is a correllation between administration and spending change, and no immediate correlation between   " +
+        "<br> &emsp;&emsp;In summary, there is a correllation between administration and spending change, and no immediate correlation between   " +
         "recession indicators and national defense spending. However, the correlation between administration and spending is not definitive. " +
-        "There are likely other factors that also influence defense spending. "
+        "There are likely other factors that also influence defense spending. " + 
         
         "<br><br> Hover over chart points to see details on demand!" +
-        "<br> Click <b>NEXT</b> to see the correlation of geopolitical events with defense spending."
-
+        "<br> Click <b>NEXT</b> to see the correlation of major national and world events with defense spending."
     }        
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////                   FUNCTION 3                                  //////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
     async function func3() {
-        // Clear the viz area and add buttons for the different event categories.
+        // Clears the viz area and add buttons for the different event categories.
         // Add the buttons            
         document.getElementById("viz_area").innerHTML="&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; <button id='conflictUS'>US Conflicts</button>" +
                                                         "&emsp;<button id='conflictWorld'>World Conflicts</button>" +
@@ -828,8 +963,7 @@
         document.getElementById("geopolitical").onclick = function() {update('Geopolitical');}
         document.getElementById("All").onclick = function() {update('All');}
 
- 
-
+        //Calculate window and svg elements size
         var windowSize = document.getElementById('viz_area').getBoundingClientRect()
 
         var margin = {top: 50, right: 200, bottom: 50, left: 50},
@@ -838,7 +972,6 @@
             svg2Width = windowSize.width - (margin.right),
             svg2Height = 600 * 7/10;
 
-        
         // append the svg objects to the body of the page
         d3.select("#viz_area")
             .append("div")
@@ -900,8 +1033,7 @@
             .style("border-radius", "5px")
             .style("padding", "5px")
 
-        // Create the mouse move functions
-        // For the events plot
+        // Create the mouse move functions for the events plot
         var mouseover1 = function(d) {
             Tooltip
                 .style("opacity", .95)
@@ -928,7 +1060,7 @@
                     
             mouseMove(d);}
 
-        // For the defense spending plot
+        // Mouse movement functions For the defense spending plot
         var mouseover2 = function(d) {
             Tooltip
                 .style("opacity", .95)
@@ -939,7 +1071,6 @@
                 .style("opacity", 0)
                 .style("z-index", "-1"); //Hides the tooltip for densely packed data
             }
-
         var mousemove2 = function(d) {
             Tooltip
                 .style("left", (d3.event.pageX+10)+"px")
@@ -953,9 +1084,9 @@
                       "<br>House:              " + d.House)
             }
 
-    /////////
-    //SVG 1// -- Timeline
-    /////////
+    ///////////
+    // SVG 1 // -- Events Timeline
+    ///////////
         // Create the categories for the type of events
         var eventCategories = ["US Conflict", "Non-US Conflict", "Geopolitical", "Disaster"]
         
@@ -999,6 +1130,7 @@
                     });
             }
             console.log(data_events_filtered)
+
             // Add the events to the graph
             svg1.selectAll("line")
                 .remove()
@@ -1042,9 +1174,8 @@
         }
         update('US Conflict')
 
-
     /////////
-    //SVG 2// -- Growth Chart
+    //SVG 2// -- Defense Spending plot
     /////////
         // Add X axisfor the defense spending
         var x2 = d3.scaleLinear()
@@ -1135,6 +1266,16 @@
           color: "#E8336D"
         },{
           note: {
+            label: "1968",
+            title: "Height of Anti-War Movement",
+            wrap: 75
+          },
+          data: {x: "01-01-1968", y: 620_000},
+          dy: 80,
+          dx: 0,
+          color: "#1E8449"
+        },{
+          note: {
             label: "03-23-1983",
             title: "Strategic Defense Initiative",
             wrap: 75
@@ -1195,6 +1336,7 @@
           color: "#1E8449"
         }]
 
+        // Parse the x-value dates to a date object for plotting
         const parseTime = d3.timeParse("%m-%d-%Y")
 
         const makeAnnotations = d3.annotation()
@@ -1211,9 +1353,9 @@
             .attr("class", "annotation-group")
             .call(makeAnnotations)
 
-    //////////
+    //////////////
     // LEGEND 1 //
-    //////////
+    //////////////
 
         // Add one dot in the legend for each name.
         var size = 11
@@ -1240,9 +1382,9 @@
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
-    //////////
+    //////////////
     // LEGEND 2 //
-    //////////
+    //////////////
 
         // Add one dot in the legend for each name.
         gov_keys = ['Republican - Unified','Republican - Divided','Democrat - Divided' , 'Democrat - Unified']
@@ -1278,72 +1420,84 @@
         viz_title.innerHTML="Correlating Events with Inflation Adjusted Growth of Military"
 
         //Update the text
-
-        document.getElementById("text_area").innerHTML="In the previous visualization we explored the impact of the government's political "+
-        "party and the national economic state on inflation adjusted defense spending. We saw a correlation between political party and spending, " +
-        "however, it was not able to fully explain the trends in spending. Another important factor to consider, are geopolitical events, both  " +
-        "nationally and internationally. "+ 
-        "1) the administration's political party, and 2) the national economy." +
-        "<br> In the national defense spending figure, we correlate the Presidents' political party and the 'unification' " +
-        "of the administration. Using the" +
-        "<a href='https://fred.stlouisfed.org/series/USREC'> Federal Reserve of St. Louis FRED Economic Data </a> " + 
-        "we update the growth chart with the periods of recession." +
-        "<br>According to the <a href='https://www.aei.org/foreign-and-defense-policy/the-defense-budget-through-administrations/'> "+
-        "American Enterprise Institute</a>, Republican administrations, on average, increase defense spending. "+
-        "However, in the figure above " +
-        "we see that while this is mostly true, there are periods in which the opposite is true. For example, 1968 - 1973 " +
-        "is marked by constant decrease in national defense spending despite a Republican presidency."+
-        "While the administration is not unified, meaning the one political party controls the presidency and congress, " +
-        "we cannot point to this as the cause because a divided administration is responsible for a period of increased spending from " +
-        "1981 - 1986."
-        "<br> Turning our attention to the impact of recessions on national defense spending, we see there is no clear connection.  " +
-        "While it could be said that periods of recessions are generally followed by a period of decreased national defense spending " +
-        "there are instances in which recessions did not precede periods of decline, or recessions are followed by a period of " +
-        "continued spending increase."+
-
-        "<br> Hover over chart points to see specific data!" +
-        "<br> Click <b>NEXT</b> to see the correlation of geopolitical events with growth of defense spending."
-
+        document.getElementById("text_area").innerHTML="&emsp;&emsp; In the previous visualization we explored the impact " + 
+        "of the government's political party and the national economic state on inflation adjusted defense spending. " +
+        "We saw a weak correlation between political party and spending, confirming that in general, Republican administrations " +
+        "drive national defense spending growth. However this was not always the case. " +
+        "Another important factor to consider, are geopolitical events. We explore the impact of four main categories on " +
+        "defense spending: US conflicts, Non-US conflicts, Major US disasters (the top 20 disasters by financial impact), " +
+        "and general geopolitical events. Intuitively, the most important of these factors to consider is US conflicts. " +
+        "Over the past 50 years, the US has been involved in a variety of conflicts, ranging from full scale campaigns, to "+
+        "interventions. We see that periods in which the US launched a full scale campaingn, there is also an increase in " +
+        "national defense spending. Other minor conflicts and interventions have no discernible impact on defense spending. " +
+        "The end of these major campaings, such as the Iraq and Afghanistan wars also correspond to a period of decline. " +
+        "Other major events, such as natural disasters, do not seem to impact national defense spending. This is likely due to " +
+        "the US military playing a large role in humanitarian aid and disaster response missions. " +
+        "It is clear that the major driving forces for defense spending are major US conflicts, defense related political " + 
+        "events, such as the Cold War and US anti-Vietnam war sentiment, and to a lesser extent the administration's political " +
+        "party. "+
+        "<br><br> Hover over chart points to see specific details!" +
+        "<br> Select the various categories of geopolitical events to explore their relationships to national defense spending."
         }        
     </script>
 
+    <!-- Scene Navigation Buttons -->
     <div id="button_area" style="text-align: center; position: relative;">
-        <button type="button" id="button1" onclick=init()> <b style="font-family:verdana"> START </b></button>
+        <button type="button" id="button1" > <b style="font-family:verdana"> START </b></button>
+        <script>
+            document.getElementById("button1").onclick = function() {document.getElementById("text_header").remove(); 
+                        init();}
+        </script>
     </div>
 
+    <!-- Discussion section header -->
     <div style="text-align: center; position: relative;">
         <h2 id="text_header" style="font-family:verdana">Introduction & Instructions</h2>
     </div>
 
+    <!-- Text/Disucssion area -->
     <p id="text_area" style="font-family:verdana">
-        &emsp; The growth of the US National debt has been a major topic of concern in recent years. 
-        National Defense and Military spending comprises 13% of the recent US Government spending 
-        (<a href="https://fiscaldata.treasury.gov/americas-finance-guide/federal-spending/">Treasury.gov</a>). 
-        As an active duty military member, I am very interested in this topic and exploring the impact of key factors 
-        changes in National Defense spending. We will explore the growth of National Defense spending over the last 50 years (1962-2023),
-        correlate political, econimic, and world events in an attempt to identy driving factors. <br><br>
-        &emsp; <b>Press "START" above to begin.</b> Throughout the journey, navigations buttons will be available to step forward and back throughtout the visualizations.
-        Discussions of the visualizations will appear below the figures, and hints for interacting the figures will also provide some 
-        guidance.  
+        &emsp; &emsp; As an active duty military member, I have a vested interest in understanding the factors that 
+        drive changes in national defense spending. Throughout my career, changes in defense spending have affected my pay, 
+        my unit's funding, repair and maintenance scope and schedules, and deployments. 
+        Understanding the factors that drive spending policy is a compelx and challenging task, however, an interesting topic. 
+        Beyond the personal interest, there is also the National debt crisis to consider. This has been a major topic of
+         concern in recent years, and with national defense spending comprising over 10% of recent US government spending
+        [<a href="https://fiscaldata.treasury.gov/americas-finance-guide/federal-spending/">Treasury.gov</a>], and the 
+        fact that the US outspends every other country in defense, it is an important subset of government spending to explore.
+        
+        Throughout this presentations we will explore the impact of various economic, political, and world events on 
+        national defense spending. To begin, we must first get a handle on trends in spending over the last 50 years (1962-2022). 
+        Then we will correlate political, economic, and world events in an attempt to identify driving factors. 
+        
+        <br><br>
+        &emsp;&emsp; Throughout the presentation navigation buttons will be available to step forward and backwards.
+        Discussions of the visualizations will appear below the figures, keep an eye out for hints on how to interact with the figures!
+        <b>Press "START" above to begin.</b>   
     </p>
 
+    <!-- Author, References, and Data Files -->
     <h3 style="font-family:verdana"><br> Author</h3>
     <p style="font-family:verdana">Haadi Elsaawy <br> helsaawy@illinois.edu</p>
-    <h3 style="font-family:verdana"> Data Files and References </h3>
-        <p style="font-family:verdana">
-            Military Budgets: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Military Spending (csv)</a>; 
-                Source <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">US Whitehouse</a> <br>
-            Inflation Data: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Inflation Data (csv)</a>; 
-                Source  <a href="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-">	Federal Reserve Bank of Minneapolis</a><br>
-            U.S. Weather and Climate Disasters: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Environmental Disasters (csv)</a>; 
-                Source <a href="https://www.ncei.noaa.gov/access/billions/events">NOAA.GOV</a><br>
-            NBER based Recession Indicators for the United States: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Monthly Recession Indicators (csv)</a>; 
-                Source <a href="https://fred.stlouisfed.org/series/USREC"> Federal Reserve of St. Louis FRED Economic Data </a>
-            United States Administration Political Party: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">Party Government</a>; 
-                Source <a href="https://history.house.gov/Institution/Presidents-Coinciding/Party-Government/"> US Whitehouse History </a>
-                
-
+    <h3 style="font-family:verdana"> References </h3>
+        <p>
+            Military Spending: <a href="https://www.whitehouse.gov/omb/budget/historical-tables/">US Whitehouse</a> <br>
+            Inflation Data: <a href="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-">	Federal Reserve Bank of Minneapolis</a><br>
+            U.S. Weather and Climate Disasters: <a href="https://www.ncei.noaa.gov/access/billions/events">NOAA.GOV</a><br>
+            NBER based Recession Indicators for the United States: <a href="https://fred.stlouisfed.org/series/USREC"> Federal Reserve of St. Louis FRED Economic Data </a><br>
+            United States Administration Political Party: <a href="https://history.house.gov/Institution/Presidents-Coinciding/Party-Government/"> US Whitehouse History </a>
         </p>
+    <h3 style="font-family:verdana"> Datafiles </h3>
+        <p>
+        <a href='https://elsaawy.github.io/416project/government_and_spending_CPI_adj.csv'>Adjusted Military Spending, inflation rates, administration political parties (csv)</a>
+        <br>
+        <a href='https://elsaawy.github.io/416project/spending_raw.csv'>Unadjusted Defense Spending (csv)</a>;
+        <br>
+        <a href='https://elsaawy.github.io/416project/recession_indicators.csv'>Recession Indicators (csv)</a>;
+        <br>
+        <a href='https://elsaawy.github.io/416project/Events.csv'>Major Events and Disasters (csv)</a>
+        </p>
+    </h3>
     </div>
-
+<!-- Phew. 1400+ lines later. That was fun. -->
 </html>
