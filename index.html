@@ -2,7 +2,7 @@
 
     <div style="text-align: center; position: relative;">
         <h1>
-        Visualizing Influences on Military Spending
+        Visualizing Influences on Defense Spending
         </h1>
         <h2 id="viz_title"><br></h2>
     </div>
@@ -12,13 +12,6 @@
         html * {
             font-family: verdana;
             zoom: 100%;
-        }
-        .horizontal-center {
-          margin: 0;
-          position: absolute;
-          left: 50%;
-          -ms-transform: translateX(-50%);
-          transform: translateX(-50%);
         }
     </style>
 
@@ -31,17 +24,16 @@
     <!-- Create the main visualization element -->
     <div id="viz_area"> </div>
 
+
     <script>
     // Initialize data variable (allows data variable sharing between functions.)
     var data_spending;
     var data_spending_raw;
     var data_events;
     var data_recc;
-    
-    
-    
+        
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////                   Figure 0                                    //////////////////////////////////////////////
+    ////////////////                   SCENE 1                                     //////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     async function init() {
@@ -53,7 +45,6 @@
                         return {Name : d.Name, Category : d.Category, Type : d.Type, Date: d3.timeParse("%m-%d-%Y")(d.Date)}})
         data_recc = await d3.csv('https://elsaawy.github.io/416project/recession_indicators.csv', function(d){
                         return { Date : d3.timeParse("%Y-%m-%d")(d.Date), Indicator : d.Indicator }})
-
 
         document.getElementById("viz_area").innerHTML = ""
         // set the dimensions and margins of the graph
@@ -144,9 +135,9 @@
                 .attr("d", area)
                 .attr("transform", "translate(100,25)")
 
-        //////////
-        // HIGHLIGHT GROUP //
-        //////////
+    /////////////////////
+    // HIGHLIGHT GROUP //
+    /////////////////////
 
         // What to do when one group is hovered
         var highlight = function(d){
@@ -215,9 +206,9 @@
             .attr("class", "annotation-group")
             .call(makeAnnotations)
 
-        //////////
-        // LEGEND //
-        //////////
+    ////////////
+    // LEGEND //
+    ////////////
 
         // Add one dot in the legend for each name.
         var size = 20
@@ -254,7 +245,7 @@
         button = document.getElementById("button_area")
         button.innerHTML='<button type="button" id="button1" onclick=func1()> <b style="font-family:verdana"> NEXT </b></button>'
         viz_title =document.getElementById("viz_title") 
-        viz_title.innerHTML="Growth of Military Spending Over the Past 50 Years"
+        viz_title.innerHTML="50 Year Growth of Defense Spending"
         document.getElementById("text_area").innerHTML="&emsp;&emsp;Between 1962 to 2022 national defense spending has grown from 52.35 B to 765.82 B USD, "+
         "a <b>1,462% increase</b>! <br> Of the 8.0 Trillion USD reported by the " + 
         "<a href='https://www.whitehouse.gov/omb/budget/historical-tables/'>US Whitehouse</a> spent in 2022, " + 
@@ -270,7 +261,7 @@
     }        
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////                   FUNCTION 1                                  //////////////////////////////////////////////
+    ////////////////                   SCENE 2                                     //////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function func1() {
         // Read the data (CPI adjusted categorical data)
@@ -345,9 +336,9 @@
             .domain(keys)
             .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#17becf","#7f7f7f","#bcbd22"])
 
-        //////////
+        //////////////////////
         // HIGHLIGHT Legend //
-        //////////
+        //////////////////////
 
         // What to do when one group is hovered
         var highlight = function(d){
@@ -502,13 +493,13 @@
                          '<button type="button" id="button2" onclick=func2()> <b style="font-family:verdana"> NEXT </b></button>'
         // Update the chart title
         viz_title =document.getElementById("viz_title") 
-        viz_title.innerHTML="Inflation Adjusted Growth of Military Spending Over the Past 50 Years"
+        viz_title.innerHTML="Inflation Adjusted Growth of Defense Spending"
         // Update discussion text
         document.getElementById("text_area").innerHTML="&emsp;&emsp;In the previous visualization we saw a dramtic increase in national defense "+
         "spending over 50 years. Because of the time scale of the spending values, we must adjust for inflation to accurately compare " +
         "spending, this data was adjusted to 2021 USD using the Consumer Price Index (CPI) from the " +
         "<a href='https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-'>Federal Reserve Bank of Minneapolis</a>" +
-        "The basic formula is: Adjusted Value = Actual Value * (2021 CPI / Current CPI). " +
+        "The basic formula is: Adjusted Value = Actual Value * (2022 CPI / Current CPI). " +
         "Adjusting for CPI reveals a different story in the growth of national defense spending. Now we see that defense spending " +
         "grew from 468 B to 709 B USD over 50 years, a growth of 151%. Looking closer at the figure, we see that "+
         "not all categories grew proportionally (hover over the legend categories to highlight a specific group). " + 
@@ -528,7 +519,7 @@
     }   
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////                   FUNCTION 2                                  //////////////////////////////////////////////
+    ////////////////                   SCENE 3                                     //////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function func2() {
 
@@ -913,7 +904,7 @@
             '<button type="button" id="button2" onclick=func3()> <b style="font-family:verdana"> NEXT </b></button>'
         //Update the Title
         viz_title =document.getElementById("viz_title") 
-        viz_title.innerHTML="Correlating Events with Inflation Adjusted Growth of Military"
+        viz_title.innerHTML="Political and Economic Factors vs. Defense Spending"
 
         //Update the discussion text
         document.getElementById("text_area").innerHTML="&emsp;&emsp;In the previous visualizations we saw national defense spending by category "+
@@ -932,8 +923,8 @@
         "However, in the figure above " +
         "we see that while this is mostly true, there are periods in which the opposite is true. For example, defense spending from 1964 - 1968 "+ 
         "grew consistently despite a unified Democrat administration, and 1968 - 1973 " +
-        "is marked by constant decrease in national defense spending despite a Republican presidency."+
-        "Looking at periods of recessions also does not provide insight into change in defense spending. We expect governments increase spending " +
+        "is marked by constant decrease in national defense spending despite a Republican presidency. "+
+        "Periods of recessions also do not provide insight into change in defense spending. We expect governments increase spending " +
         "back into the national economy to stimulate growth, increase employment, and stem the effects of a recession. While this is likely true of " +
         "national spending as a whole, it does not seem to be the case for national defense spending, even on a time lagged scale. " +
 
@@ -946,7 +937,7 @@
     }        
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////                   FUNCTION 3                                  //////////////////////////////////////////////
+    ////////////////                   SCENE 4                                     //////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function func3() {
         // Clears the viz area and add buttons for the different event categories.
@@ -1417,7 +1408,7 @@
         button.innerHTML='<button type="button" id="button1" onclick=func2()> <b style="font-family:verdana"> BACK </b></button>'
         //Update the Title
         viz_title =document.getElementById("viz_title") 
-        viz_title.innerHTML="Correlating Events with Inflation Adjusted Growth of Military"
+        viz_title.innerHTML="US and World Events vs. Defense Spending"
 
         //Update the text
         document.getElementById("text_area").innerHTML="&emsp;&emsp; In the previous visualization we explored the impact " + 
